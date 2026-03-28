@@ -1,8 +1,14 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path');
+
+// Safety check for critical environment variables
+if (!process.env.JWT_SECRET) {
+  console.warn('⚠️ WARNING: JWT_SECRET is not defined in your .env file! Using a temporary fallback for development.');
+  process.env.JWT_SECRET = 'SOCIETY_TEMP_KEY_2024';
+}
 
 const app = express();
 
