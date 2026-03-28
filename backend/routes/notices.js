@@ -52,12 +52,20 @@ router.get('/', protect, async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    const processedNotices = notices.map(notice => ({
-      ...notice,
-      hasAcknowledged: notice.acknowledgedBy && notice.acknowledgedBy.some(
-        a => a.user.toString() === req.user._id.toString()
-      )
-    }));
+    const processedNotices = notices.map(notice => {
+      // Safety check for acknowledgements
+      const ackList = Array.isArray(notice.acknowledgedBy) ? notice.acknowledgedBy : [];
+      const hasAcknowledged = req.user ? ackList.some(
+        a => a.user && a.user.toString() === req.user._id.toString()
+      ) : false;
+
+      return {
+        ...notice,
+        hasAcknowledged,
+        postedByName: notice.postedBy ? notice.postedBy.name : (notice.postedByName || 'System'),
+        postedByRole: notice.postedBy ? notice.postedBy.role : 'admin'
+      };
+    });
 
     // Remove the potentially large array before sending to frontend
     processedNotices.forEach(n => delete n.acknowledgedBy);
@@ -204,7 +212,7 @@ router.post('/sos', protect, async (req, res) => {
       isImportant: true,
       societyName: req.user.societyName,
       postedBy: req.user._id,
-      postedByName: req.user.name,
+      postedByName: req.user.name || 'Resident',
       expiryDate: new Date(Date.now() + 24 * 60 * 60 * 1000)
     });
 
@@ -228,7 +236,7 @@ router.post('/:id/bookmark', protect, async (req, res) => {
     if (!notice) return res.status(404).json({ success: false, message: 'Notice not found' });
 
     const bookmarkId = notice._id.toString();
-    const bookmarks = req.user.bookmarks.map(id => id.toString());
+    const bookmarks = (req.user.bookmarks || []).map(id => id.toString());
     const index = bookmarks.indexOf(bookmarkId);
     
     if (index === -1) {

@@ -29,7 +29,21 @@ app.use('/api/visitors', visitorRoutes);
 
 // Health check
 app.get('/', (req, res) => {
-  res.json({ message: 'Society Notice API is running ✅', time: new Date().toISOString() });
+  res.json({ 
+    success: true,
+    message: 'SocietySphere Production API is live ✅', 
+    timestamp: new Date().toISOString() 
+  });
+});
+
+// GLOBAL ERROR HANDLER - Repair everything catch-all
+app.use((err, req, res, next) => {
+  console.error('[GLOBAL ERROR]:', err.message, err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: 'System Error: ' + err.message,
+    error: process.env.NODE_ENV === 'production' ? null : err.stack
+  });
 });
 
 // Connect MongoDB then start server

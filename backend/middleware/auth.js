@@ -8,13 +8,19 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = await User.findById(decoded.id).select('-password');
+      
+      if (!req.user) {
+        return res.status(401).json({ success: false, message: 'User no longer exists' });
+      }
+      
       return next();
-    } catch {
-      return res.status(401).json({ success: false, message: 'Token invalid or expired' });
+    } catch (err) {
+      return res.status(401).json({ success: false, message: 'Auth Failed: ' + err.message });
     }
   }
-  if (!token) return res.status(401).json({ success: false, message: 'No token provided' });
+  if (!token) return res.status(401).json({ success: false, message: 'Authentication required: No token provided' });
 };
+
 
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === 'admin') return next();
