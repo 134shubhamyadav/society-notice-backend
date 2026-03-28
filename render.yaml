@@ -1,7 +1,9 @@
 services:
   - type: web
-    name: society-notice-backend
+    name: society-sphere-backend
     env: node
+    plan: free
+    rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -10,4 +12,4 @@ services:
       - key: MONGO_URI
         sync: false
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
