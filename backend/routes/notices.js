@@ -76,30 +76,6 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-// GET /api/notices/bookmarks — Optimized fetch
-router.get('/bookmarks', protect, async (req, res) => {
-  try {
-    const userWithBookmarks = await User.findById(req.user._id)
-      .populate({
-        path: 'bookmarks',
-        match: { status: 'active' }, // Only show active notices
-        options: { sort: { createdAt: -1 } }
-      });
-    
-    if (!userWithBookmarks) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    // Defensive: filter out any dead references
-    const cleanBookmarks = (userWithBookmarks.bookmarks || []).filter(b => b != null);
-
-    res.json({ success: true, count: cleanBookmarks.length, data: cleanBookmarks });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Bookmark Load Failed: ' + err.message });
-  }
-});
-
-
 // GET /api/notices/trash
 router.get('/trash', protect, adminOnly, async (req, res) => {
   try {
@@ -229,37 +205,6 @@ router.post('/sos', protect, async (req, res) => {
   } catch (err) {
     console.error(`[SOS] FATAL ERROR: ${err.message}`, err.stack);
     res.status(500).json({ success: false, message: `Server Error: ${err.message}` });
-  }
-});
-
-// POST /api/notices/:id/bookmark — Atomic toggle
-router.post('/:id/bookmark', protect, async (req, res) => {
-  try {
-    const notice = await Notice.findById(req.params.id);
-    if (!notice) return res.status(404).json({ success: false, message: 'Notice not found' });
-
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    const bookmarkId = notice._id.toString();
-    const existingBookmarks = (user.bookmarks || []).map(id => id.toString());
-    const isBookmarked = existingBookmarks.includes(bookmarkId);
-    
-    if (isBookmarked) {
-      user.bookmarks.pull(notice._id);
-    } else {
-      user.bookmarks.push(notice._id);
-    }
-    
-    await user.save();
-    res.json({ 
-        success: true, 
-        isBookmarked: !isBookmarked, 
-        count: user.bookmarks.length,
-        bookmarks: user.bookmarks 
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Bookmark Update Error: ' + err.message });
   }
 });
 

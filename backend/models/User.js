@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
   flatNumber: { type: String, trim: true, default: '' },
   expoPushToken: { type: String, default: null },
   acknowledgedNotices: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Notice' }],
-  bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Notice' }],
   securityKey: { type: String, default: '' },
   resetRequest: {
     status: { type: String, enum: ['None', 'Pending', 'Approved', 'Rejected'], default: 'None' },
