@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "SocietySphere",
+    "slug": "society-notice-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "societysphere",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "android": {
+      "package": "com.societysphere.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1565C0"
+      },
+      "permissions": [
+        "NOTIFICATIONS",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "color": "#1565C0",
+          "androidMode": "default",
+          "androidCollapsedTitle": "SocietySphere",
+          "iosDisplayInForeground": true
+        }
+      ],
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "3cc0ff78-81c7-4f59-a470-ee8bdb531926"
+      }
+    }
+  }
+}
