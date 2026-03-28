@@ -90,9 +90,12 @@ router.get('/bookmarks', protect, async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.json({ success: true, count: userWithBookmarks.bookmarks.length, data: userWithBookmarks.bookmarks });
+    // Defensive: filter out any dead references
+    const cleanBookmarks = (userWithBookmarks.bookmarks || []).filter(b => b != null);
+
+    res.json({ success: true, count: cleanBookmarks.length, data: cleanBookmarks });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Bookmark Load Failed: ' + err.message });
   }
 });
 
@@ -229,26 +232,34 @@ router.post('/sos', protect, async (req, res) => {
   }
 });
 
-// POST /api/notices/:id/bookmark
+// POST /api/notices/:id/bookmark — Atomic toggle
 router.post('/:id/bookmark', protect, async (req, res) => {
   try {
     const notice = await Notice.findById(req.params.id);
     if (!notice) return res.status(404).json({ success: false, message: 'Notice not found' });
 
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
     const bookmarkId = notice._id.toString();
-    const bookmarks = (req.user.bookmarks || []).map(id => id.toString());
-    const index = bookmarks.indexOf(bookmarkId);
+    const existingBookmarks = (user.bookmarks || []).map(id => id.toString());
+    const isBookmarked = existingBookmarks.includes(bookmarkId);
     
-    if (index === -1) {
-      req.user.bookmarks.push(notice._id);
+    if (isBookmarked) {
+      user.bookmarks.pull(notice._id);
     } else {
-      req.user.bookmarks.splice(index, 1);
+      user.bookmarks.push(notice._id);
     }
     
-    await req.user.save();
-    res.json({ success: true, isBookmarked: req.user.bookmarks.map(id => id.toString()).includes(bookmarkId), bookmarks: req.user.bookmarks });
+    await user.save();
+    res.json({ 
+        success: true, 
+        isBookmarked: !isBookmarked, 
+        count: user.bookmarks.length,
+        bookmarks: user.bookmarks 
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Bookmark Update Error: ' + err.message });
   }
 });
 
