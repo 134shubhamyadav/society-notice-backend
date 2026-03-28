@@ -64,17 +64,23 @@ export async function registerForPushNotifications() {
     return null;
   }
 
-  // Save token to backend only if user is logged in
-  try {
-    const activeToken = await AsyncStorage.getItem('token');
-    if (activeToken) {
-      await savePushToken(token);
-    } else {
-      console.log('Skipping push token save: User not authenticated');
+  // Try to save token - using a small delay to ensure AsyncStorage is ready after login
+  setTimeout(async () => {
+    try {
+      const activeToken = await AsyncStorage.getItem('token');
+      if (activeToken) {
+        await savePushToken(token);
+        console.log('Push token synced successfully');
+      }
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        console.warn('Push token 401 - likely race condition, silent failure is okay as it will retry next app open');
+      } else {
+        console.warn('Could not save push token:', err.message);
+      }
     }
-  } catch (err) {
-    console.warn('Could not save push token:', err.message);
-  }
+  }, 1000); // 1 second delay for stability
+
 
   return token;
 }

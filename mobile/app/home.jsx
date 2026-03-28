@@ -7,7 +7,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import NoticeCard from '../components/NoticeCard';
-import { getNotices, triggerSOS, bookmarkNotice } from '../services/api';
+import { getNotices, triggerSOS } from '../services/api';
 import { registerForPushNotifications } from '../services/notifications';
 import { useAuth } from './_layout';
 import { COLORS, SHADOW } from '../constants/theme';
@@ -39,10 +39,14 @@ export default function HomeScreen() {
   const fetchNotices = async () => {
     try {
       const res = await getNotices();
-      const data = res.data.data;
-      const important = data.filter(n => n.isImportant);
-      const normal = data.filter(n => !n.isImportant);
-      setNotices([...important, ...normal]);
+      const data = res.data?.data;
+      if (Array.isArray(data)) {
+        const important = data.filter(n => n.isImportant);
+        const normal = data.filter(n => !n.isImportant);
+        setNotices([...important, ...normal]);
+      } else {
+        console.warn('Invalid notice data format:', res.data);
+      }
     } catch (err) {
       Toast.show({ type: 'error', text1: 'Could not load notices', text2: err?.response?.data?.message || err.message });
     } finally {
@@ -76,16 +80,6 @@ export default function HomeScreen() {
         }
       ]
     );
-  };
-
-  const handleBookmark = async (id) => {
-    try {
-      const res = await bookmarkNotice(id);
-      if (updateUser) await updateUser({ bookmarks: res.data.bookmarks });
-      fetchNotices();
-    } catch (err) {
-      Toast.show({ type: 'error', text1: 'Failed to update bookmark' });
-    }
   };
 
   const importantCount = notices.filter(n => n.isImportant).length;
@@ -157,13 +151,6 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.quickAccessLabel}>Visitors</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.quickAccessItem} onPress={() => router.push('/bookmarks')}>
-          <View style={[styles.quickAccessIcon, { backgroundColor: '#EBF8FF' }]}>
-            <Ionicons name="bookmark" size={22} color="#4299E1" />
-          </View>
-          <Text style={styles.quickAccessLabel}>Saved</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={styles.statsBar}>
@@ -225,8 +212,6 @@ export default function HomeScreen() {
             <SectionBreak index={index} />
             <NoticeCard
               notice={item}
-              isBookmarked={user?.bookmarks?.includes(item._id)}
-              onBookmark={() => handleBookmark(item._id)}
               onPress={() => router.push({ pathname: '/notice-detail', params: { id: item._id } })}
             />
           </View>

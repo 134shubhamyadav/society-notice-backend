@@ -8,17 +8,22 @@ import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { 
   getNotice, acknowledgeNotice, deleteNotice, castVote, postComment,
-  likeNotice, bookmarkNotice 
+  likeNotice 
 } from '../services/api';
 import { translateNotice, LANGUAGES } from '../services/translate';
 import { useAuth } from './_layout';
 import { COLORS, SHADOW } from '../constants/theme';
 
 function formatDate(d) {
-  return new Date(d).toLocaleDateString('en-IN', {
-    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: true
-  });
+  if (!d) return 'No Date';
+  try {
+    return new Date(d).toLocaleDateString('en-IN', {
+      weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+  } catch {
+    return 'Invalid Date';
+  }
 }
 
 export default function NoticeDetailScreen() {
@@ -38,20 +43,21 @@ export default function NoticeDetailScreen() {
   const [commentText, setCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [voting, setVoting] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => { fetchNotice(); }, [id]);
 
   const fetchNotice = async () => {
     try {
       const res = await getNotice(id);
-      const n = res.data.data;
+      const n = res.data?.data;
+      if (!n) throw new Error('Notice data is empty');
+      
       setNotice(n);
       setTranslated({ headline: n.headline, body: n.body });
       setHasAcknowledged(n.hasAcknowledged);
-      setIsBookmarked(user?.bookmarks?.includes(id));
     } catch (err) {
-      Toast.show({ type: 'error', text1: 'Could not load notice' });
+      console.warn('[DETAIL FETCH ERROR]:', err.message);
+      Toast.show({ type: 'error', text1: 'Notice not found', text2: 'It may have been deleted or expired.' });
       router.back();
     } finally {
       setLoading(false);
@@ -151,33 +157,6 @@ export default function NoticeDetailScreen() {
     }
   };
 
-  // Attachment open karo browser mein
-  const openAttachment = async () => {
-    if (!notice.attachment) return;
-    try {
-      await Linking.openURL(notice.attachment);
-    } catch {
-      Toast.show({ type: 'error', text1: 'Could not open file' });
-    }
-  };
-
-  // Check karo attachment image hai ya PDF
-  const isImage = (url) => {
-    if (!url) return false;
-    return /\.(jpg|jpeg|png)$/i.test(url);
-  };
-
-  const handleBookmark = async () => {
-    try {
-      const res = await bookmarkNotice(id);
-      setIsBookmarked(!isBookmarked);
-      if (updateUser) await updateUser({ bookmarks: res.data.bookmarks });
-      Toast.show({ type: 'success', text1: isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks' });
-    } catch (err) {
-      Toast.show({ type: 'error', text1: 'Failed to update bookmark' });
-    }
-  };
-
   if (loading) {
     return <View style={styles.centered}><ActivityIndicator size="large" color={COLORS.primary} /></View>;
   }
@@ -246,17 +225,27 @@ export default function NoticeDetailScreen() {
           }
 
           <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 16 }} />
-
-          <View style={styles.socialRow}>
-            <TouchableOpacity onPress={handleBookmark} style={styles.socialBtn}>
-              <Ionicons 
-                name={isBookmarked ? 'bookmark' : 'bookmark-outline'} 
-                size={22} color={isBookmarked ? COLORS.primary : COLORS.textMuted} 
-              />
-              <Text style={styles.socialText}>{isBookmarked ? 'Bookmarked' : 'Bookmark'}</Text>
-            </TouchableOpacity>
-          </View>
         </View>
+ 
+        {/* ATTACHMENT SECTION (The requested 'Bar') */}
+        {notice.externalLink && (
+          <TouchableOpacity 
+            activeOpacity={0.7}
+            style={styles.attachmentBar} 
+            onPress={() => Linking.openURL(notice.externalLink)}
+          >
+            <View style={styles.attachmentIcon}>
+              <Ionicons name="document-attach-outline" size={20} color={COLORS.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.attachmentLabel}>Official Document / Link</Text>
+              <Text style={styles.attachmentText} numberOfLines={1}>
+                {notice.externalLink}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        )}
 
         {/* Meta info */}
         <View style={styles.metaRow}>
@@ -312,7 +301,7 @@ export default function NoticeDetailScreen() {
           </View>
         )}
 
-        {/* Translation buttons */}
+        {/* Bottom row: category chip */}
         <View style={styles.translateSection}>
           <Text style={styles.translateLabel}>🌐 Translate Notice</Text>
           <View style={styles.langRow}>
@@ -378,6 +367,37 @@ const styles = StyleSheet.create({
     marginBottom: 12, borderLeftWidth: 4, borderLeftColor: COLORS.primary, ...SHADOW,
   },
   headline: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary, lineHeight: 26 },
+  attachmentBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    padding: 14,
+    borderRadius: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#EEF2FF',
+    ...SHADOW,
+  },
+  attachmentIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#F3F4FB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  attachmentLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 2,
+  },
+  attachmentText: {
+    fontSize: 11,
+    color: COLORS.primary,
+    fontWeight: '500',
+  },
   bodyCard: { backgroundColor: COLORS.white, borderRadius: 14, padding: 16, marginBottom: 12, ...SHADOW },
   bodyLabel: { fontSize: 11, fontWeight: '700', color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 },
   bodyText: { fontSize: 15, color: COLORS.textSecondary, lineHeight: 24 },

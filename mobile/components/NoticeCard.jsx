@@ -5,10 +5,16 @@ import { COLORS, SHADOW } from '../constants/theme';
 
 // Format date nicely: "17 Mar 2026 · 04:30 PM"
 function formatDate(dateString) {
-  const d = new Date(dateString);
-  const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-  return `${date}  ·  ${time}`;
+  if (!dateString) return 'No Date';
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return 'Invalid Date';
+    const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return `${date}  ·  ${time}`;
+  } catch {
+    return 'Date Error';
+  }
 }
 
 // Category theme mapping
@@ -23,8 +29,11 @@ const CATEGORY_THEMES = {
   Other: { icon: 'document-text', color: '#9E9E9E', bg: '#F5F5F5' },
 };
 
-export default function NoticeCard({ notice, onPress, onBookmark, isBookmarked }) {
-  const theme = CATEGORY_THEMES[notice.category] || CATEGORY_THEMES.Other;
+export default function NoticeCard({ notice, onPress }) {
+  if (!notice) return null;
+
+  const category = notice.category || 'General';
+  const theme = CATEGORY_THEMES[category] || CATEGORY_THEMES.Other;
   
   // Dynamic visual read receipt: Mutes the border color if notice is acknowledged
   const borderLeftColor = notice.hasAcknowledged ? COLORS.textMuted : theme.color;
@@ -50,29 +59,32 @@ export default function NoticeCard({ notice, onPress, onBookmark, isBookmarked }
 
       {/* Body preview — shown after headline */}
       <Text style={styles.bodyPreview} numberOfLines={2}>{notice.body}</Text>
+ 
+      {/* Attachment Bar — Prominent link for documents/links */}
+      {notice.externalLink && (
+        <TouchableOpacity 
+          activeOpacity={0.7}
+          style={styles.attachmentBar} 
+          onPress={() => Linking.openURL(notice.externalLink)}
+        >
+          <View style={styles.attachmentIcon}>
+            <Ionicons name="document-attach-outline" size={16} color={COLORS.primary} />
+          </View>
+          <Text style={styles.attachmentText} numberOfLines={1}>
+            View Attached Document / Link
+          </Text>
+          <Ionicons name="chevron-forward" size={14} color={COLORS.textMuted} />
+        </TouchableOpacity>
+      )}
 
-      {/* Bottom row: category chip + bookmark */}
+      {/* Bottom row: category chip */}
       <View style={styles.bottomRow}>
         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
           <View style={[styles.categoryChip, { backgroundColor: theme.bg }]}>
             <Ionicons name={theme.icon} size={12} color={theme.color} />
             <Text style={[styles.categoryText, { color: theme.color }]}>{notice.category}</Text>
           </View>
-
-          {notice.externalLink && (
-            <TouchableOpacity 
-              style={styles.docBtn} 
-              onPress={() => Linking.openURL(notice.externalLink)}
-            >
-              <Ionicons name="document-text" size={14} color={COLORS.primary} />
-              <Text style={styles.docBtnText}>DOC</Text>
-            </TouchableOpacity>
-          )}
         </View>
-
-        <TouchableOpacity onPress={onBookmark} style={styles.bookmarkBtn}>
-          <Ionicons name={isBookmarked ? 'bookmark' : 'bookmark-outline'} size={20} color={isBookmarked ? COLORS.primary : COLORS.textMuted} />
-        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -162,24 +174,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  bookmarkBtn: {
-    padding: 4,
-  },
-  docBtn: {
+  attachmentBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#EEF2FF',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 20,
+    backgroundColor: '#F3F4FB',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 8,
     borderWidth: 1,
-    borderColor: COLORS.primary + '30',
+    borderColor: '#E2E8F0',
+    marginBottom: 4,
   },
-  docBtnText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: COLORS.primary,
+  attachmentIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    ...SHADOW,
+  },
+  attachmentText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.primaryDark,
   },
   attribution: {
     flexDirection: 'row',

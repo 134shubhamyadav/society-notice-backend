@@ -114,14 +114,6 @@ export default function ProfileScreen() {
             <Text style={styles.directoryText}>{user?.role === 'admin' ? 'Gate Security Logs' : 'My Visitors'}</Text>
             <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} style={{ marginLeft: 'auto' }} />
           </TouchableOpacity>
-          <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 6 }} />
-          <TouchableOpacity style={styles.directoryBtn} onPress={() => router.push('/bookmarks')}>
-            <View style={styles.directoryIconWrap}>
-              <Ionicons name="bookmark-outline" size={18} color={COLORS.primary} />
-            </View>
-            <Text style={styles.directoryText}>Saved Notices</Text>
-            <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} style={{ marginLeft: 'auto' }} />
-          </TouchableOpacity>
 
           {user?.role === 'resident' && (
             <>

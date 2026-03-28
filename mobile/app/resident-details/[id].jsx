@@ -86,7 +86,7 @@ export default function ResidentDetailsScreen() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Resident Profile</Text>
         <View style={styles.privacyBadge}>
-          <Ionicons name="shield-lock" size={12} color={COLORS.white} />
+          <Ionicons name="shield-checkmark" size={12} color={COLORS.white} />
           <Text style={styles.privacyText}>SECURE</Text>
         </View>
       </View>
@@ -129,7 +129,7 @@ export default function ResidentDetailsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personal Details</Text>
           <InfoRow icon="transgender-outline" label="Gender" value={resident.gender} />
-          <InfoRow icon="calendar-clear-outline" label="Date of Birth" 
+          <InfoRow icon="calendar-outline" label="Date of Birth" 
             value={resident.dob ? new Date(resident.dob).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : null} />
         </View>
 

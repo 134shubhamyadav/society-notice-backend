@@ -10,6 +10,21 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+// Response interceptor for "Repair Everything" - Detailed Logging
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response ? error.response.status : 'NETWORK_ERROR';
+    const message = error.response?.data?.message || error.message;
+    console.warn(`[API ERROR] ${status}: ${message}`);
+    
+    if (status === 401) {
+      console.error('Session expired or unauthorized. Please re-login.');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const register = (data) => api.post('/auth/register', data);
 export const login = (data) => api.post('/auth/login', data);
 export const getMe = () => api.get('/auth/me');
@@ -34,7 +49,6 @@ export const getNotice = (id) => api.get(`/notices/${id}`);
 export const postNotice = (data) => api.post('/notices', data);
 export const updateNotice = (id, data) => api.put(`/notices/${id}`, data);
 export const deleteNotice = (id) => api.delete(`/notices/${id}`);
-export const bookmarkNotice = (id) => api.post(`/notices/${id}/bookmark`);
 export const getTrashNotices = () => api.get('/notices/trash');
 export const restoreTrashNotice = (id) => api.put(`/notices/trash/${id}/restore`);
 export const deleteTrashNotice = (id) => api.delete(`/notices/trash/${id}/permanent`);
