@@ -1,0 +1,177 @@
+====================================================================
+               SOCIETYSPHERE - VIVA PREPARATION GUIDE (50 QUESTIONS)
+====================================================================
+Project Name: SocietySphere (Digital Society Notice & Management Portal)
+Team: Atharva, Abhinav, Shubham
+Guide: Dr. K.T. Patil
+Tech Stack: React Native, Expo, Node.js, Express, MongoDB (MERN Stack)
+====================================================================
+
+--------------------------------------------------------------------
+SECTION 1: PROJECT VISION, SCOPE & REQUIREMENT ANALYSIS
+--------------------------------------------------------------------
+Q1: What is the primary problem SocietySphere solves?
+A: It digitizes fragmented communication in housing societies, removing the reliance on physical notice boards and chaotic WhatsApp groups by providing a structured, secure portal for notices, ticketing, and gate security.
+
+Q2: Who are the primary users of this system?
+A: Society Admins (Managers/Secretaries), Security Guards, and Residents.
+
+Q3: What are the main functional requirements of your app?
+A: Notice broadcasting, real-time polling, emergency SOS triggering, helpdesk complaint ticketing, and visitor logging.
+
+Q4: What are the non-functional requirements you focused on?
+A: High availability (cloud hosting), real-time alerts (sub-second push notifications), security (JWT authentication), and multilingual accessibility (AI translation).
+
+Q5: If WhatsApp exists, why build this app?
+A: WhatsApp groups lack structure—important notices get lost in chat noise, polls are not anonymous, complaints cannot be tracked (ticket status), and SOS alerts don't have override priority. Our app enforces data structure and specific workflows.
+
+Q6: How did you divide the work among the team members?
+A: (Customize this answer) Example: One handled React Native UI/UX, one handled the Node.js Backend/MongoDB schemas, and one handled API integration and Expo deployment.
+
+Q7: What was the most challenging part of this project?
+A: (Customize this answer) Example: Handling the Expo Push Notifications reliably, or bypassing the URL length limits of the translation API, or linking the MongoDB relational data for Polls and Acknowledgments.
+
+Q8: What is the future scope of SocietySphere?
+A: Integrating a payment gateway (like Razorpay) for monthly maintenance dues, creating a cloud-based ledger, and adding a facility booking system (for the clubhouse/pool).
+
+Q9: Is your app scalable?
+A: Yes. Because the backend is a stateless REST API (Node/Express) and the database is NoSQL (MongoDB Atlas), it can instantly scale horizontally to support 10,000+ residents across multiple societies.
+
+Q10: Did you use Agile or Waterfall methodology?
+A: We used Agile. We built the basic notice board first (MVP), tested it, and then iteratively added complex features like SOS, Polling, and Complaints in subsequent sprints.
+
+--------------------------------------------------------------------
+SECTION 2: REACT NATIVE, EXPO & FRONTEND ARCHITECTURE
+--------------------------------------------------------------------
+Q11: Why did you choose React Native over Flutter or Native Android (Java/Kotlin)?
+A: React Native allows us to use JavaScript, which we already use on the backend (Node.js). It gave us a unified stack (MERN) and allowed us to build for both iOS and Android simultaneously.
+
+Q12: What is Expo?
+A: Expo is a framework built around React Native. It handles the heavy lifting of native compilation, gives us easy access to device hardware (like push notifications), and provides `expo-router` for easy file-based navigation.
+
+Q13: How does routing work in your app?
+A: We use `expo-router`, which is a file-based routing system. The folder structure in the `/app` directory automatically maps to the app's screens (e.g., `/home`, `/notice-detail`).
+
+Q14: Give examples of React Hooks you used in the app.
+A: `useState` (for local state like forms), `useEffect` (for running functions on screen load, like fetching APIs), and `useFocusEffect` (to refresh data whenever a screen comes into view).
+
+Q15: How did you handle background data refreshing?
+A: We used `useFocusEffect` on the Home screen. Every time a user navigates back to Home, it silently calls `fetchNotices()` in the background to ensure data isn't stale.
+
+Q16: How did you build the UI components? Did you use a library?
+A: We largely built custom UI components using absolute Vanilla React Native `StyleSheet` to ensure maximum control over the "glassmorphic" premium aesthetic, rather than relying on heavy UI libraries.
+
+Q17: What is `AsyncStorage` and what is it used for?
+A: It is an unencrypted, asynchronous, persistent, key-value storage system for React Native. We used it to store the JWT token and basic User Object so the user stays logged in even if they close and reopen the app.
+
+Q18: What is the purpose of the `_layout.jsx` file?
+A: It acts as the backbone of the app. It manages the global Stack navigator, injects the `AuthContext` (global state), and acts as a security guard to redirect unauthenticated users back to the Login screen.
+
+Q19: How does the "pull-to-refresh" feature work?
+A: We used the `RefreshControl` component provided by React Native inside our `FlatList`. When pulled, it sets a boolean `refreshing` state to true, calls the backend API, and sets it to false when the promise resolves.
+
+Q20: How did you implement real-time Language Translation?
+A: We used the MyMemory Translation API. We built a custom tokenizer in `translate.js` that splits giant English strings into 400-character chunks, translates them simultaneously via `Promise.all`, and sews them back together.
+
+--------------------------------------------------------------------
+SECTION 3: NODE.JS, EXPRESS & API DESIGN
+--------------------------------------------------------------------
+Q21: What is Node.js?
+A: It is an asynchronous, event-driven JavaScript runtime environment built on Chrome's V8 engine, allowing us to execute JavaScript code outside of a web browser (on the server).
+
+Q22: What is Express.js?
+A: It's a minimal web application framework for Node.js. It simplifies the creation of RESTful APIs, routing, and middleware management.
+
+Q23: What is a REST API?
+A: REpresentational State Transfer. It is an architectural style for APIs where we use standard HTTP methods (GET, POST, PUT, DELETE) to interact with resources (like Notices, Complaints, Visitors).
+
+Q24: Explain the difference between GET, POST, PUT, and DELETE.
+A: GET retrieves data (viewing notices). POST creates new data (posting a notice). PUT updates existing data (resolving a complaint). DELETE removes data (deleting a notice).
+
+Q25: What is Middleware in Express?
+A: Middleware are functions that execute between receiving a request and sending a response. We used them for Authentication (the `protect` middleware that extracts and verifies JWTs before allowing access to an API route).
+
+Q26: How did you upload files or images initially, and why did you change it?
+A: Initially, we used `multer` to handle `multipart/form-data`. However, cloud hosts delete local files on restart. To ensure stability and avoid React Native blob corruption, we refactored to pure lightweight JSON structures.
+
+Q27: Provide an example of how a router is structured in your app.
+A: In `backend/routes/notices.js`, we map `router.get('/', getNotices)` to fetch all notices, and `router.post('/', protect, adminOnly, createNotice)` to ensure only verified admins can post.
+
+Q28: How do you handle Cross-Origin Resource Sharing (CORS)?
+A: We use the `cors` npm package in our Express `server.js` file, which adds appropriate HTTP headers allowing our Expo client to successfully request data from our Node.js server domain without being blocked.
+
+Q29: What happens if an API request fails on the backend?
+A: We wrap all async controller functions in `try...catch` blocks. If it fails, the catch block intercepts it and responds with `res.status(500).json({ success: false, message: error.message })`.
+
+Q30: Why is the backend deployed on Render?
+A: Render provides an easy, continuous-deployment pipeline linked directly to our GitHub repository. It spins up an instance of our Node.js server and makes it accessible via a public HTTPS URL.
+
+--------------------------------------------------------------------
+SECTION 4: MONGODB, MONGOOSE & DATABASE DESIGN
+--------------------------------------------------------------------
+Q31: What is MongoDB? Why use it over MySQL?
+A: MongoDB is a NoSQL, document-oriented database. We chose it because it uses JSON-like documents (BSON), which perfectly matches our JavaScript stack, allowing us to easily store arrays (like poll options) without complex table joins.
+
+Q32: What is Mongoose?
+A: Mongoose is an Object Data Modeling (ODM) library for MongoDB and Node.js. It enforces strict schemas, provides validation, and translates Javascript objects into MongoDB instructions.
+
+Q33: Can you explain the Notice Schema?
+A: The Notice schema holds properties like `headline` (String), `body` (String), `isImportant` (Boolean), `societyName` (String), and `pollOptions` (an Array of Objects containing `text` and array of `votes` using ObjectIds).
+
+Q34: How are Polls calculated dynamically in the schema?
+A: When a user votes, we `$push` their user `_id` into the `votes` array of the specific poll option. The total votes are calculated by aggregating the `.length` of all vote arrays across all options.
+
+Q35: How did you implement isolation between different housing societies using the same app?
+A: Every User, Notice, and Complaint schema has a required `societyName` field. When querying `Model.find()`, we enforce the filter `{ societyName: req.user.societyName }`. This automatically scopes data so Society A cannot see Society B's data.
+
+Q36: Explain Mongoose Population (`populate()`).
+A: In schemas, we often store a reference ID instead of full objects (like `postedBy: UserID`). We use `.populate('postedBy', 'name')` to instruct Mongoose to look up that ID in the User collection and return their actual name.
+
+Q37: What is the difference between `findOne` and `findById`?
+A: `findOne` lets us query a document based on any parameter (e.g., `User.findOne({ email: 'abc@gmail.com' })`), whereas `findById` directly takes the unique 24-character hex `_id` assigned by MongoDB.
+
+Q38: Tell us about an edge case you solved with the database schema.
+A: Older, legacy User profiles crashed the 'Forgot Password' flow because they were created before we added the `resetRequest` object to the schema. We solved this by hardening the backend to check `if (!user.resetRequest)` before reading its properties.
+
+Q39: Is your database local or on the cloud?
+A: Our database is hosted on MongoDB Atlas, ensuring 99.99% uptime, automated backups, and global accessibility compared to running `mongod` locally.
+
+Q40: How does MongoDB handle high-speed continuous polling updates?
+A: MongoDB handles `$push` operations atomically at the document level, meaning concurrent votes by 100 residents lock and update incredibly fast without corrupting the array.
+
+--------------------------------------------------------------------
+SECTION 5: ADVANCED SECURITY, PUSH TOKENS & EXECUTION
+--------------------------------------------------------------------
+Q41: What is JWT and how does it protect the API?
+A: JSON Web Token is a cryptographically signed payload. Once logged in, the client sends the JWT. Our `protect` middleware uses `jwt.verify()` with our server-side `JWT_SECRET`. If it's valid, it extracts the User ID; if tampered with, it immediately denies access (401 Unauthorized).
+
+Q42: Why is JWT better than Session Cookies for mobile apps?
+A: Mobile apps often don't natively maintain cookie jars like web browsers do. JWTs are stateless and sent explicitly in the `Authorization` header, making them perfect for RESTful API connections in React Native.
+
+Q43: Explain how Expo Push Notifications work technically.
+A: Upon login, the app queries Expo's servers using our `projectId` to generate a unique `ExpoPushToken`. We save this token to our MongoDB user profile. When a notice is posted, our Node.js server uses the `expo-server-sdk` to fire payloads directly to those saved tokens via Expo's push routing network.
+
+Q44: How does the Global SOS Panic feature work?
+A: The frontend triggers a `POST /notices/sos` endpoint. The backend immediately isolates the user's `societyName`, retrieves all push tokens associated with that society, and dispatches a critical-priority notification (with sound/vibration overrides on Android channels) to everyone instantly.
+
+Q45: We noticed a bug where logging out caused a "401 Unauthorized" warning regarding Push Tokens. How did you fix it?
+A: Generating a push token is asynchronous. If a user logged out too fast, the async function tried to save the token via API *after* the local auth token was deleted. We fixed it by placing a defensive `AsyncStorage.getItem('token')` lock before firing the API request.
+
+Q46: How do you secure user passwords?
+A: In `User.js`, we use a Mongoose `pre('save')` hook with `bcrypt.js`. We generate a "salt" of 10 rounds, cryptographically hash the password, and store ONLY the hash. Passwords are never stored in plain text.
+
+Q47: Can an Admin recover an account without a database wipe?
+A: Yes. We engineered a "Zero-Day Recovery" mechanism. During registration, Admins must create a permanent 4-digit 'Personal Security Key'. In the Forget Password flow, submitting this key alongside their email immediately overwrites their password hash securely.
+
+Q48: What is `.env` and why isn't it committed to GitHub?
+A: Environment variables (like `MONGO_URI`, `JWT_SECRET`) contain highly sensitive keys. If committed to a public GitHub repository, malicious bots would instantly scrape the database credentials. They are kept purely in the runtime environment.
+
+Q49: How did you solve the React Native TextInput crash bug in the Notice Detail screen?
+A: Attempting to render the Comment Section caused a `ReferenceError` because the core React component (`TextInput` or `View`) wasn't explicitly imported within that file's module scope, causing the JavaScript interpreter to crash.
+
+Q50: Overall, what was your biggest learning outcome from this project?
+A: (Customize this) Moving from theoretical textbook learning to a full-scale, connected architectural system. Understanding how real REST APIs communicate over HTTP, debugging asynchronous state operations, managing schema security, and physically compiling Native Android Binaries from code.
+
+====================================================================
+GOOD LUCK WITH YOUR PRESENTATION!
+====================================================================

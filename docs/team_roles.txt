@@ -1,0 +1,51 @@
+====================================================================
+               SOCIETYSPHERE - TEAM ROLE DIVISION
+====================================================================
+Project Name: SocietySphere (Digital Society Notice & Management Portal)
+Team: Atharva, Abhinav, Shubham
+====================================================================
+
+Below is a highly realistic, professional division of labor for your project. This is exactly how commercial software teams divide tasks. 
+(You can decide amongst yourselves who takes which role for the Viva/Report)
+
+--------------------------------------------------------------------
+ROLE 1: Frontend Mobile Developer (React Native UI/UX)
+Person: [Shubham]
+--------------------------------------------------------------------
+RESPONSIBILITIES:
+1. Designed and coded the entire visual interface using React Native `StyleSheet` (achieving the premium glassmorphic aesthetic).
+2. Configured the file-based navigation system using `expo-router`.
+3. Handled complex frontend logic using React Hooks (`useState`, `useEffect`, `useFocusEffect`).
+4. Designed the interactive components: The percentage-filling Poll bars, the SOS Panic Button animation, and the language translation toggle buttons.
+
+VIVA FOCUS: This person should answer all questions regarding the mobile app interface, Expo framework, and local storage (`AsyncStorage`).
+
+--------------------------------------------------------------------
+ROLE 2: Backend API & Security Architect (Node.js & Express)
+Person: [Atharva]
+--------------------------------------------------------------------
+RESPONSIBILITIES:
+1. Built the underlying RESTful API using the Express.js framework.
+2. Engineered the strict Authentication system: User Login, JWT (JSON Web Token) generation, and `bcrypt` password hashing.
+3. Created the backend routing controllers for Notices, Complaints, and Visitor Logging.
+4. Programmed the "Identity Recovery / Forgot Password" logic, allowing Admins to recover accounts via a secret Registration Key.
+5. Handled the Middlewares: Specifically the one that strips the `societyName` from the JWT token and enforces data isolation between different societies.
+
+VIVA FOCUS: This person should answer all questions regarding server routing, REST APIs, JSON data structures, and how passwords are kept safe.
+
+--------------------------------------------------------------------
+ROLE 3: Database, Cloud Services & Integrations (MongoDB & APIs)
+Person: [Abhinav]
+--------------------------------------------------------------------
+RESPONSIBILITIES:
+1. Engineered the NoSQL database architecture utilizing MongoDB Atlas and Mongoose schemas (handling complex document arrays like Poll Votes).
+2. Built the Global Emergency Push Notification System utilizing the Expo Server SDK (including the backend loop that bypasses society structures during an SOS).
+3. Developed the AI Translation Engine: Specifically writing the custom text-chunking algorithm to split massive strings and execute them in parallel against the MyMemory API.
+4. Handled the final Native Compilation (Building the Android APK via EAS) and managed cloud deployment on Render.
+
+VIVA FOCUS: This person should answer all questions regarding database structures, MongoDB `$push` arrays, Push Notification logic, and API data chunking.
+
+====================================================================
+PRO-TIP FOR REPORT/VIVA:
+While these are specialized roles, make sure every team member emphasizes that they collaborated on the overall logic. In reality, modern Full-Stack teams overlap heavily.
+====================================================================

@@ -1,0 +1,119 @@
+====================================================================
+               SOCIETYSPHERE - PRESENTATION SLIDES & SCRIPT
+====================================================================
+Use this document to prepare your PowerPoint slides and your exact talking points during your presentation.
+
+--------------------------------------------------------------------
+SLIDE 1: Title Slide
+--------------------------------------------------------------------
+[Visuals]
+Main Title: SocietySphere
+Subtitle: Digital Society Notice & Management Portal
+Team Members: Atharva, Abhinav, Shubham
+Project Guide: Dr. K.T. Patil
+Institution: SMT. Indira Gandhi College of Engineering
+
+[Talking Points]
+"Good morning everyone. We are excited to present our final year project, SocietySphere—a comprehensive mobile application designed to digitize, secure, and streamline housing society operations."
+
+--------------------------------------------------------------------
+SLIDE 2: Problem Statement
+--------------------------------------------------------------------
+[Visuals]
+Bullet Points:
+- Reliance on chaotic WhatsApp groups.
+- Loss of important data in overwhelming chat noise.
+- Lack of accountability and ticket-tracking for maintenance complaints.
+- Polls are not anonymous or strictly structured.
+- Slow emergency response (SOS) systems.
+
+[Talking Points]
+"Currently, housing societies rely on physical notice boards and chaotic WhatsApp groups. Important announcements get buried under hundreds of messages. If a resident has a plumbing issue, there is no official tracker, and in an emergency, trying to call the guard takes too long. We needed a structured solution."
+
+--------------------------------------------------------------------
+SLIDE 3: Proposed Solution
+--------------------------------------------------------------------
+[Visuals]
+Bullet Points:
+- A unified, role-based mobile application.
+- One central hub replacing scattered apps.
+- Strict separation between Admins (Managers) and Residents.
+- Real-time data sync with push notification alerts.
+
+[Talking Points]
+"Our solution is SocietySphere: a centralized mobile application built natively for iOS and Android. It completely digitizes the management flow, offering dedicated roles for Admins to maintain order and dedicated tools for Residents to stay connected and safe."
+
+--------------------------------------------------------------------
+SLIDE 4: Core Features
+--------------------------------------------------------------------
+[Visuals]
+Grid or Icons showing:
+1. Notice Board & Live Polling
+2. Global Emergency SOS
+3. Helpdesk Ticketing
+4. Visitor Gate Security
+5. Multilingual AI Translation
+
+[Talking Points]
+"We built five core modules. Admins can broadcast notices and launch interactive percentage-based polls. Residents have a Helpdesk to raise and track maintenance tickets. Guards have a Visitor logging system. And most importantly, all notices have an embedded AI Translation engine capable of perfectly translating complex English announcements into Hindi and Marathi."
+
+--------------------------------------------------------------------
+SLIDE 5: Technology Stack (MERN)
+--------------------------------------------------------------------
+[Visuals]
+Logos: MongoDB, Express.js, React Native, Node.js, Expo
+
+[Talking Points]
+"To ensure the app is fast and scalable, we utilized the MERN stack. We built the mobile frontend entirely in JavaScript using React Native and Expo, which allows us to compile native Kotlin/Swift binaries seamlessly. The backend consists of a secure Node.js and Express REST API, connected to a highly available MongoDB Atlas cloud database."
+
+--------------------------------------------------------------------
+SLIDE 6: System Architecture & Security
+--------------------------------------------------------------------
+[Visuals]
+Diagram showing: Mobile App <--> REST API (JWT Check) <--> MongoDB Atlas
+
+[Talking Points]
+"Security is paramount in our architecture. All communication is secured via JSON Web Tokens (JWT). Passwords are cryptographically hashed using bcrypt. To ensure data isolation, our backend automatically filters every database query by 'societyName', physically preventing users in Society A from querying data in Society B."
+
+--------------------------------------------------------------------
+SLIDE 7: Engineering Challenges Solved
+--------------------------------------------------------------------
+[Visuals]
+Bullet Points:
+1. The SOS Override Payload.
+2. Safe URL Translation Chunking.
+3. Push Notification API 401 Locking.
+
+[Talking Points]
+"We solved several complex engineering challenges. For example, free translation APIs crash when URLs contain too many characters. We engineered a custom algorithm to chunk massive paragraphs into safe 400-character segments, translate them simultaneously alongside Promise.all, and stitch them back together on the screen invisibly."
+
+--------------------------------------------------------------------
+SLIDE 8: The Global SOS System
+--------------------------------------------------------------------
+[Visuals]
+Screenshot of the SOS button and the received Push Notification.
+
+[Talking Points]
+"We want to highlight our Global SOS module. When triggered, our backend instantly loops through every single user in that specific society—both residents and security—and dispatches critically prioritized Push Notifications directly via the Expo Server SDK. This saves crucial seconds during fires or medical emergencies."
+
+--------------------------------------------------------------------
+SLIDE 9: Live Demonstration (The App Action)
+--------------------------------------------------------------------
+[Visuals]
+Play a recorded video or show a live screen-share of the app.
+
+[Talking Points]
+"We will now demonstrate the app live. You will see an Admin posting a notice, a Resident instantly receiving a push notification, using the AI to translate it to Hindi, and voting on an interactive poll."
+
+--------------------------------------------------------------------
+SLIDE 10: Conclusion & Future Scope
+--------------------------------------------------------------------
+[Visuals]
+Bullet Points:
+- Successful MVP Deployment.
+- Future: Payment Gateway (Maintenance Dues).
+- Future: Amenities Booking System.
+
+[Talking Points]
+"In conclusion, SocietySphere is a production-ready MVP. In the future, we plan to integrate a Razorpay module for automated maintenance dues collection and a clubhouse booking system. Thank you. We are now open for questions."
+====================================================================
