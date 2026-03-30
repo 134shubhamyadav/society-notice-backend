@@ -5,13 +5,23 @@ const Society = require('../models/Society');
 const Support = require('../models/Support');
 const { protect } = require('../middleware/auth');
 
-// Middleware to ensure role is developer
+// Middleware to ensure user is a developer (via role OR verified email)
 const devOnly = (req, res, next) => {
-  if (req.user && req.user.role === 'developer') return next();
+  const isDev = req.user && (req.user.role === 'developer' || req.user.email?.endsWith('@societysphere.com'));
+  if (isDev) return next();
   return res.status(403).json({ success: false, message: 'Developer access required' });
 };
 
 // --- Society Management ---
+router.get('/societies', protect, devOnly, async (req, res) => {
+  try {
+    const societies = await Society.find().sort({ name: 1 });
+    res.json({ success: true, data: societies });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 router.post('/societies', protect, devOnly, async (req, res) => {
   try {
     const { name, city } = req.body;

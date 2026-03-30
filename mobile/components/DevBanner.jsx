@@ -5,14 +5,13 @@ import { COLORS, SHADOW } from '../constants/theme';
 import { devSwitchContext } from '../services/api';
 import Toast from 'react-native-toast-message';
 
+import { useRouter } from 'expo-router';
+
 export default function DevBanner() {
   const { user, updateUser } = useAuth();
+  const router = useRouter();
 
-  // Only show if the user is a developer OR currently emulating something else but is actually a dev
-  // Since we update the DB, we might need a way to know they are "actually" a dev.
-  // For now, if the email contains '@societysphere.com' we can assume they are devs.
   const isDevAccount = user?.email?.endsWith('@societysphere.com');
-  
   if (!isDevAccount) return null;
 
   const resetToDev = async () => {
@@ -20,6 +19,7 @@ export default function DevBanner() {
       const res = await devSwitchContext('developer', 'Developer HQ');
       await updateUser(res.data.data);
       Toast.show({ type: 'success', text1: 'Developer Context Restored' });
+      router.replace('/developer/dashboard');
     } catch {
       Toast.show({ type: 'error', text1: 'Reset failed' });
     }
@@ -27,12 +27,14 @@ export default function DevBanner() {
 
   return (
     <View style={styles.banner}>
-      <View style={styles.content}>
+      <TouchableOpacity style={styles.content} onPress={() => router.replace('/developer/dashboard')}>
         <Ionicons name="construct" size={14} color={COLORS.white} />
         <Text style={styles.text}>
-          TEST MODE: <Text style={styles.bold}>{user.role.toUpperCase()}</Text> | {user.societyName}
+          <Text style={styles.bold}>{user.role.toUpperCase()}</Text> | {user.societyName}
         </Text>
-      </View>
+        <Ionicons name="open-outline" size={12} color="rgba(255,255,255,0.6)" />
+      </TouchableOpacity>
+      
       <TouchableOpacity style={styles.resetBtn} onPress={resetToDev}>
         <Text style={styles.resetText}>RESET</Text>
       </TouchableOpacity>

@@ -183,6 +183,20 @@ export default function ProfileScreen() {
           <InfoRow icon="person-outline" label="Guide" value="Dr. K.T. Patil" />
         </View>
 
+        {/* Developer Shortcut (Only for @societysphere.com users) */}
+        {user?.email?.endsWith('@societysphere.com') && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Platform Tools</Text>
+            <TouchableOpacity style={styles.directoryBtn} onPress={() => router.replace('/developer/dashboard')}>
+              <View style={[styles.directoryIconWrap, { backgroundColor: '#F0FDF4' }]}>
+                <Ionicons name="construct" size={18} color="#15803D" />
+              </View>
+              <Text style={styles.directoryText}>Open Developer Portal</Text>
+              <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} style={{ marginLeft: 'auto' }} />
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Logout */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={20} color={COLORS.important} />
