@@ -54,11 +54,21 @@ app.use((err, req, res, next) => {
   });
 });
 
+const seed = require('./seed');
+
 // Connect MongoDB then start server
 const PORT = process.env.PORT || 5000;
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
+  .then(async () => {
     console.log('✅ MongoDB connected');
+    
+    // Auto-seed if database is uninitialized (No developers found)
+    const devCount = await User.countDocuments({ role: 'developer' });
+    if (devCount === 0) {
+      console.log('⚡ Initializing database (auto-seeding)...');
+      await seed();
+    }
+
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Server running on port ${PORT}`);
       console.log(`   Local:   http://localhost:${PORT}`);

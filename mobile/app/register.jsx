@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, Image,
   StyleSheet, ScrollView, ActivityIndicator,
@@ -31,7 +31,7 @@ export default function RegisterScreen() {
   const [showSocietyModal, setShowSocietyModal] = useState(false);
   const [search, setSearch] = useState('');
 
-  useState(() => {
+  useEffect(() => {
     fetchSocieties();
   }, []);
 

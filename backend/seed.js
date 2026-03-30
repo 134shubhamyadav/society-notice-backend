@@ -51,9 +51,7 @@ const initialSocieties = [
 
 const seed = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('Connected to MongoDB for seeding...');
-
+    console.log('🌱 Starting database seeding...');
     // Seed Societies
     for (const s of initialSocieties) {
       await Society.findOneAndUpdate({ name: s.name }, s, { upsert: true });
@@ -72,11 +70,14 @@ const seed = async () => {
     }
 
     console.log('✅ Developer accounts seeded');
-    process.exit(0);
   } catch (err) {
     console.error('❌ Seeding failed:', err.message);
-    process.exit(1);
   }
 };
 
-seed();
+module.exports = seed;
+
+// Keep the immediate execution if run directly via 'node seed.js'
+if (require.main === module) {
+  mongoose.connect(process.env.MONGO_URI).then(() => seed().then(() => process.exit(0)));
+}
