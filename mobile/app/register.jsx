@@ -310,8 +310,8 @@ export default function RegisterScreen() {
           <View style={[styles.calendarCard, { maxHeight: '60%' }]}>
             <Text style={styles.calendarMonth}>Select State</Text>
             <ScrollView style={{ marginTop: 10 }}>
-              {[...new Set(societies.map(s => s.state))].sort().map(st => (
-                <TouchableOpacity key={st} style={styles.societyItem} onPress={() => {
+              {[...new Set(societies.map(s => s.state).filter(Boolean))].sort().map(st => (
+                <TouchableOpacity key={`state-${st}`} style={styles.societyItem} onPress={() => {
                   setSelectedState(st);
                   setSelectedCity('');
                   set('societyName', '');
@@ -335,8 +335,8 @@ export default function RegisterScreen() {
           <View style={[styles.calendarCard, { maxHeight: '60%' }]}>
             <Text style={styles.calendarMonth}>Select City ({selectedState})</Text>
             <ScrollView style={{ marginTop: 10 }}>
-              {[...new Set(societies.filter(s => s.state === selectedState).map(s => s.city))].sort().map(ct => (
-                <TouchableOpacity key={ct} style={styles.societyItem} onPress={() => {
+              {[...new Set(societies.filter(s => s.state === selectedState).map(s => s.city).filter(Boolean))].sort().map(ct => (
+                <TouchableOpacity key={`city-${ct}`} style={styles.societyItem} onPress={() => {
                   setSelectedCity(ct);
                   set('societyName', '');
                   setShowCityModal(false);
