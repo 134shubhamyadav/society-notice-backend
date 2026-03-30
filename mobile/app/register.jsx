@@ -29,6 +29,10 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [societies, setSocieties] = useState([]);
   const [showSocietyModal, setShowSocietyModal] = useState(false);
+  const [showStateModal, setShowStateModal] = useState(false);
+  const [showCityModal, setShowCityModal] = useState(false);
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -173,9 +177,33 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* State Selection */}
+          <Text style={styles.label}>Select State *</Text>
+          <TouchableOpacity style={styles.inputWrap} onPress={() => setShowStateModal(true)}>
+            <Ionicons name="map-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
+            <Text style={[styles.input, !selectedState && { color: COLORS.textMuted }]}>
+              {selectedState || 'Select state'}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={COLORS.textMuted} style={{ marginRight: 15 }} />
+          </TouchableOpacity>
+
+          {/* City Selection */}
+          <Text style={styles.label}>Select City *</Text>
+          <TouchableOpacity 
+            style={[styles.inputWrap, !selectedState && { opacity: 0.5 }]} 
+            onPress={() => selectedState ? setShowCityModal(true) : Toast.show({ type: 'info', text1: 'Select state first' })}>
+            <Ionicons name="location-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
+            <Text style={[styles.input, !selectedCity && { color: COLORS.textMuted }]}>
+              {selectedCity || 'Select city'}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={COLORS.textMuted} style={{ marginRight: 15 }} />
+          </TouchableOpacity>
+
           {/* Society Name Selection */}
           <Text style={styles.label}>Select Your Society *</Text>
-          <TouchableOpacity style={styles.inputWrap} onPress={() => setShowSocietyModal(true)}>
+          <TouchableOpacity 
+            style={[styles.inputWrap, !selectedCity && { opacity: 0.5 }]} 
+            onPress={() => selectedCity ? setShowSocietyModal(true) : Toast.show({ type: 'info', text1: 'Select city first' })}>
             <Ionicons name="business-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
             <Text style={[styles.input, !form.societyName && { color: COLORS.textMuted }]}>
               {form.societyName || 'Select your society'}
@@ -276,21 +304,70 @@ export default function RegisterScreen() {
         </View>
       </ScrollView>
 
+      {/* State Modal */}
+      {showStateModal && (
+        <View style={styles.calendarModal}>
+          <View style={[styles.calendarCard, { maxHeight: '60%' }]}>
+            <Text style={styles.calendarMonth}>Select State</Text>
+            <ScrollView style={{ marginTop: 10 }}>
+              {[...new Set(societies.map(s => s.state))].sort().map(st => (
+                <TouchableOpacity key={st} style={styles.societyItem} onPress={() => {
+                  setSelectedState(st);
+                  setSelectedCity('');
+                  set('societyName', '');
+                  setShowStateModal(false);
+                }}>
+                  <Text style={styles.societyItemName}>{st}</Text>
+                  {selectedState === st && <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity style={styles.closeCalendar} onPress={() => setShowStateModal(false)}>
+              <Text style={styles.closeCalendarText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* City Modal */}
+      {showCityModal && (
+        <View style={styles.calendarModal}>
+          <View style={[styles.calendarCard, { maxHeight: '60%' }]}>
+            <Text style={styles.calendarMonth}>Select City ({selectedState})</Text>
+            <ScrollView style={{ marginTop: 10 }}>
+              {[...new Set(societies.filter(s => s.state === selectedState).map(s => s.city))].sort().map(ct => (
+                <TouchableOpacity key={ct} style={styles.societyItem} onPress={() => {
+                  setSelectedCity(ct);
+                  set('societyName', '');
+                  setShowCityModal(false);
+                }}>
+                  <Text style={styles.societyItemName}>{ct}</Text>
+                  {selectedCity === ct && <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity style={styles.closeCalendar} onPress={() => setShowCityModal(false)}>
+              <Text style={styles.closeCalendarText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       {/* Society Selection Modal */}
       {showSocietyModal && (
         <View style={styles.calendarModal}>
           <View style={[styles.calendarCard, { maxHeight: '80%' }]}>
-            <Text style={styles.calendarMonth}>Select Society</Text>
+            <Text style={styles.calendarMonth}>Select Society ({selectedCity})</Text>
             <TextInput 
               style={styles.searchInput}
-              placeholder="Search by name or city..." 
+              placeholder="Search by name..." 
               value={search}
               onChangeText={setSearch}
             />
             <ScrollView style={{ marginTop: 10 }}>
               {societies.filter(s => 
-                s.name.toLowerCase().includes(search.toLowerCase()) || 
-                s.city.toLowerCase().includes(search.toLowerCase())
+                s.city === selectedCity && 
+                s.name.toLowerCase().includes(search.toLowerCase())
               ).map(s => (
                 <TouchableOpacity key={s._id} style={styles.societyItem} onPress={() => {
                   set('societyName', s.name);
@@ -298,7 +375,6 @@ export default function RegisterScreen() {
                 }}>
                   <View>
                     <Text style={styles.societyItemName}>{s.name}</Text>
-                    <Text style={styles.societyItemCity}>{s.city}</Text>
                   </View>
                   {form.societyName === s.name && <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />}
                 </TouchableOpacity>

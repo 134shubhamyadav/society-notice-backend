@@ -43,10 +43,10 @@ const developers = [
 ];
 
 const initialSocieties = [
-  { name: 'Sunrise Apartments', city: 'Mumbai' },
-  { name: 'Green Valley', city: 'Pune' },
-  { name: 'Lotus Residency', city: 'Bangalore' },
-  { name: 'Developer HQ', city: 'Cloud' }
+  { name: 'Sunrise Apartments', city: 'Mumbai', state: 'Maharashtra' },
+  { name: 'Green Valley', city: 'Pune', state: 'Maharashtra' },
+  { name: 'Lotus Residency', city: 'Bangalore', state: 'Karnataka' },
+  { name: 'Developer HQ', city: 'Cloud', state: 'Cloud' }
 ];
 
 const seed = async () => {

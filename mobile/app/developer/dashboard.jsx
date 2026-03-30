@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SHADOW } from '../../constants/theme';
-import { getDevSocieties, addSociety, deleteSociety, getSupportTickets, updateTicketStatus } from '../../services/api';
+import { getDevSocieties, addSociety, deleteSociety, getSupportTickets, updateTicketStatus, devSwitchContext } from '../../services/api';
 import Toast from 'react-native-toast-message';
 import { useState, useEffect } from 'react';
 
@@ -18,6 +18,7 @@ export default function DeveloperDashboard() {
   // New Society Form
   const [newName, setNewName] = useState('');
   const [newCity, setNewCity] = useState('');
+  const [newState, setNewState] = useState('Maharashtra');
 
   useEffect(() => {
     fetchData();
@@ -55,12 +56,12 @@ export default function DeveloperDashboard() {
   };
 
   const handleAddSociety = async () => {
-    if (!newName || !newCity) return Toast.show({ type: 'error', text1: 'Name and City required' });
+    if (!newName || !newCity || !newState) return Toast.show({ type: 'error', text1: 'Name, City and State required' });
     try {
-      const res = await addSociety({ name: newName, city: newCity });
+      const res = await addSociety({ name: newName, city: newCity, state: newState });
       setSocieties([res.data.data, ...societies]);
       setNewName(''); setNewCity('');
-      Toast.show({ type: 'success', text1: 'Society added to dropdown! 🎉' });
+      Toast.show({ type: 'success', text1: 'Society added to dashboard! 🎉' });
     } catch (err) {
       Toast.show({ type: 'error', text1: 'Failed to add society' });
     }
@@ -111,44 +112,56 @@ export default function DeveloperDashboard() {
       </View>
 
       {tab === 'testing' && (
-        <ScrollView style={{ flex: 1, padding: 20 }}>
-          <Text style={styles.formTitle}>Emulation & Testing Tools</Text>
-          <Text style={styles.itemSub}>Switch your role and society temporarily to test the app as different users.</Text>
-          
-          <View style={{ marginTop: 20 }}>
-            <Text style={styles.label}>1. Select Target Role</Text>
-            <View style={styles.testRow}>
-              <TouchableOpacity style={styles.testBtn} onPress={() => handleSwitchContext('admin', societies[0]?.name || 'Sunrise Apartments')}>
-                <Ionicons name="shield-checkmark" size={20} color={COLORS.primary} />
-                <Text style={styles.testBtnText}>As Admin</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.testBtn} onPress={() => handleSwitchContext('resident', societies[0]?.name || 'Sunrise Apartments')}>
-                <Ionicons name="people" size={20} color={COLORS.primary} />
-                <Text style={styles.testBtnText}>As Resident</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+        <View style={{ flex: 1 }}>
+          <FlatList
+            data={societies}
+            keyExtractor={s => s._id}
+            ListHeaderComponent={() => (
+              <View style={{ padding: 20, paddingBottom: 10 }}>
+                <Text style={styles.formTitle}>Emulation & Testing Tools</Text>
+                <Text style={styles.itemSub}>Switch your role and society temporarily to test the app as different users.</Text>
+                
+                <View style={{ marginTop: 20 }}>
+                  <Text style={styles.label}>1. Select Target Role</Text>
+                  <View style={styles.testRow}>
+                    <TouchableOpacity style={styles.testBtn} onPress={() => handleSwitchContext('admin', societies[0]?.name || 'Sunrise Apartments')}>
+                      <Ionicons name="shield-checkmark" size={20} color={COLORS.primary} />
+                      <Text style={styles.testBtnText}>As Admin</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.testBtn} onPress={() => handleSwitchContext('resident', societies[0]?.name || 'Sunrise Apartments')}>
+                      <Ionicons name="people" size={20} color={COLORS.primary} />
+                      <Text style={styles.testBtnText}>As Resident</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
 
-          <View style={{ marginTop: 25 }}>
-            <Text style={styles.label}>2. Teleport to Society</Text>
-            {societies.map(s => (
-              <TouchableOpacity key={s._id} style={styles.itemCard} onPress={() => handleSwitchContext('resident', s.name)}>
+                <View style={{ marginTop: 25 }}>
+                  <Text style={styles.label}>2. Teleport to Society</Text>
+                </View>
+              </View>
+            )}
+            contentContainerStyle={{ paddingBottom: 30 }}
+            renderItem={({ item: s }) => (
+              <TouchableOpacity key={s._id} style={[styles.itemCard, { marginHorizontal: 20 }]} onPress={() => handleSwitchContext('resident', s.name)}>
                 <View>
                   <Text style={styles.itemName}>{s.name}</Text>
-                  <Text style={styles.itemSub}>{s.city} (Testing as Resident)</Text>
+                  <Text style={styles.itemSub}>{s.city}, {s.state}</Text>
                 </View>
                 <Ionicons name="airplane-outline" size={20} color={COLORS.primary} />
               </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
+            )}
+          />
+        </View>
       )}
 
       {tab === 'societies' && (
         <View style={styles.formCard}>
           <Text style={styles.formTitle}>Add New Society</Text>
           <TextInput style={styles.input} placeholder="Society Name" value={newName} onChangeText={setNewName} />
-          <TextInput style={styles.input} placeholder="City" value={newCity} onChangeText={setNewCity} />
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <TextInput style={[styles.input, { flex: 1 }]} placeholder="City" value={newCity} onChangeText={setNewCity} />
+            <TextInput style={[styles.input, { flex: 1 }]} placeholder="State" value={newState} onChangeText={setNewState} />
+          </View>
           <TouchableOpacity style={styles.btnAdd} onPress={handleAddSociety}>
             <Text style={styles.btnAddText}>Register Society</Text>
           </TouchableOpacity>

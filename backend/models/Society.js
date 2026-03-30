@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const societySchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true, unique: true },
+  state: { type: String, required: true, trim: true, default: 'Maharashtra' },
   city: { type: String, required: true, trim: true },
   createdAt: { type: Date, default: Date.now }
 });

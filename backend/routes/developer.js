@@ -24,9 +24,9 @@ router.get('/societies', protect, devOnly, async (req, res) => {
 
 router.post('/societies', protect, devOnly, async (req, res) => {
   try {
-    const { name, city } = req.body;
-    if (!name || !city) return res.status(400).json({ success: false, message: 'Name and City required' });
-    const society = await Society.create({ name, city });
+    const { name, city, state } = req.body;
+    if (!name || !city || !state) return res.status(400).json({ success: false, message: 'Name, City and State required' });
+    const society = await Society.create({ name, city, state });
     res.status(201).json({ success: true, data: society });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

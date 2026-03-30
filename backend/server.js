@@ -68,6 +68,14 @@ mongoose.connect(process.env.MONGO_URI)
     if (devCount === 0) {
       console.log('⚡ Initializing database (auto-seeding)...');
       await seed();
+    } else {
+      // Migration: Ensure all societies have a 'state' (Required for the new registration filter)
+      const needsMigration = await Society.findOne({ state: { $exists: false } });
+      if (needsMigration) {
+        console.log('⚡ Migrating legacy societies (adding default state)...');
+        await Society.updateMany({ state: { $exists: false } }, { state: 'Maharashtra' });
+        console.log('✅ Migration complete');
+      }
     }
 
     app.listen(PORT, '0.0.0.0', () => {
