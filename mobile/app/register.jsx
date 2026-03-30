@@ -306,24 +306,52 @@ export default function RegisterScreen() {
 
       {/* State Modal */}
       {showStateModal && (
-        <View style={styles.calendarModal}>
-          <View style={[styles.calendarCard, { maxHeight: '60%' }]}>
-            <Text style={styles.calendarMonth}>Select State</Text>
-            <ScrollView style={{ marginTop: 10 }}>
-              {[...new Set(societies.map(s => s.state).filter(Boolean))].sort().map(st => (
-                <TouchableOpacity key={`state-${st}`} style={styles.societyItem} onPress={() => {
-                  setSelectedState(st);
-                  setSelectedCity('');
-                  set('societyName', '');
-                  setShowStateModal(false);
-                }}>
-                  <Text style={styles.societyItemName}>{st}</Text>
-                  {selectedState === st && <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />}
-                </TouchableOpacity>
-              ))}
+        <View style={styles.sheetOverlay}>
+          <View style={styles.sheetContent}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>Select State</Text>
+            
+            <View style={{ paddingHorizontal: 20 }}>
+              <View style={styles.sheetSearchContainer}>
+                <Ionicons name="search" size={18} color={COLORS.textMuted} style={{ marginLeft: 12 }} />
+                <TextInput 
+                  style={styles.sheetSearchInput}
+                  placeholder="Search state..." 
+                  value={search}
+                  onChangeText={setSearch}
+                />
+                {search.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearch('')} style={{ marginRight: 12 }}>
+                    <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            <ScrollView style={{ marginTop: 10, paddingHorizontal: 20 }}>
+              {[...new Set(societies.map(s => s.state).filter(Boolean))]
+                .filter(st => st.toLowerCase().includes(search.toLowerCase()))
+                .sort()
+                .map(st => (
+                  <TouchableOpacity key={`state-${st}`} style={styles.sheetItem} onPress={() => {
+                    setSelectedState(st);
+                    setSelectedCity('');
+                    set('societyName', '');
+                    setSearch('');
+                    setShowStateModal(false);
+                  }}>
+                    <View style={styles.sheetItemRow}>
+                      <View style={styles.sheetIconBox}>
+                        <Ionicons name="map" size={18} color={COLORS.primary} />
+                      </View>
+                      <Text style={styles.sheetItemName}>{st}</Text>
+                    </View>
+                    {selectedState === st && <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />}
+                  </TouchableOpacity>
+                ))}
             </ScrollView>
-            <TouchableOpacity style={styles.closeCalendar} onPress={() => setShowStateModal(false)}>
-              <Text style={styles.closeCalendarText}>Cancel</Text>
+            <TouchableOpacity style={styles.sheetCloseBtn} onPress={() => { setShowStateModal(false); setSearch(''); }}>
+              <Text style={styles.sheetCloseText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -331,23 +359,51 @@ export default function RegisterScreen() {
 
       {/* City Modal */}
       {showCityModal && (
-        <View style={styles.calendarModal}>
-          <View style={[styles.calendarCard, { maxHeight: '60%' }]}>
-            <Text style={styles.calendarMonth}>Select City ({selectedState})</Text>
-            <ScrollView style={{ marginTop: 10 }}>
-              {[...new Set(societies.filter(s => s.state === selectedState).map(s => s.city).filter(Boolean))].sort().map(ct => (
-                <TouchableOpacity key={`city-${ct}`} style={styles.societyItem} onPress={() => {
-                  setSelectedCity(ct);
-                  set('societyName', '');
-                  setShowCityModal(false);
-                }}>
-                  <Text style={styles.societyItemName}>{ct}</Text>
-                  {selectedCity === ct && <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />}
-                </TouchableOpacity>
-              ))}
+        <View style={styles.sheetOverlay}>
+          <View style={styles.sheetContent}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>Select City in {selectedState}</Text>
+            
+            <View style={{ paddingHorizontal: 20 }}>
+              <View style={styles.sheetSearchContainer}>
+                <Ionicons name="search" size={18} color={COLORS.textMuted} style={{ marginLeft: 12 }} />
+                <TextInput 
+                  style={styles.sheetSearchInput}
+                  placeholder="Search city..." 
+                  value={search}
+                  onChangeText={setSearch}
+                />
+                {search.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearch('')} style={{ marginRight: 12 }}>
+                    <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            <ScrollView style={{ marginTop: 10, paddingHorizontal: 20 }}>
+              {[...new Set(societies.filter(s => s.state === selectedState).map(s => s.city).filter(Boolean))]
+                .filter(ct => ct.toLowerCase().includes(search.toLowerCase()))
+                .sort()
+                .map(ct => (
+                  <TouchableOpacity key={`city-${ct}`} style={styles.sheetItem} onPress={() => {
+                    setSelectedCity(ct);
+                    set('societyName', '');
+                    setSearch('');
+                    setShowCityModal(false);
+                  }}>
+                    <View style={styles.sheetItemRow}>
+                      <View style={styles.sheetIconBox}>
+                        <Ionicons name="location" size={18} color={COLORS.primary} />
+                      </View>
+                      <Text style={styles.sheetItemName}>{ct}</Text>
+                    </View>
+                    {selectedCity === ct && <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />}
+                  </TouchableOpacity>
+                ))}
             </ScrollView>
-            <TouchableOpacity style={styles.closeCalendar} onPress={() => setShowCityModal(false)}>
-              <Text style={styles.closeCalendarText}>Cancel</Text>
+            <TouchableOpacity style={styles.sheetCloseBtn} onPress={() => { setShowCityModal(false); setSearch(''); }}>
+              <Text style={styles.sheetCloseText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -355,33 +411,50 @@ export default function RegisterScreen() {
 
       {/* Society Selection Modal */}
       {showSocietyModal && (
-        <View style={styles.calendarModal}>
-          <View style={[styles.calendarCard, { maxHeight: '80%' }]}>
-            <Text style={styles.calendarMonth}>Select Society ({selectedCity})</Text>
-            <TextInput 
-              style={styles.searchInput}
-              placeholder="Search by name..." 
-              value={search}
-              onChangeText={setSearch}
-            />
-            <ScrollView style={{ marginTop: 10 }}>
+        <View style={styles.sheetOverlay}>
+          <View style={[styles.sheetContent, { height: '85%' }]}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>Select Society in {selectedCity}</Text>
+            
+            <View style={{ paddingHorizontal: 20 }}>
+              <View style={styles.sheetSearchContainer}>
+                <Ionicons name="search" size={18} color={COLORS.textMuted} style={{ marginLeft: 12 }} />
+                <TextInput 
+                  style={styles.sheetSearchInput}
+                  placeholder="Search by society name..." 
+                  value={search}
+                  onChangeText={setSearch}
+                />
+                {search.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearch('')} style={{ marginRight: 12 }}>
+                    <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            <ScrollView style={{ marginTop: 10, paddingHorizontal: 20 }}>
               {societies.filter(s => 
                 s.city === selectedCity && 
                 s.name.toLowerCase().includes(search.toLowerCase())
               ).map(s => (
-                <TouchableOpacity key={s._id} style={styles.societyItem} onPress={() => {
+                <TouchableOpacity key={s._id} style={styles.sheetItem} onPress={() => {
                   set('societyName', s.name);
+                  setSearch('');
                   setShowSocietyModal(false);
                 }}>
-                  <View>
-                    <Text style={styles.societyItemName}>{s.name}</Text>
+                  <View style={styles.sheetItemRow}>
+                    <View style={styles.sheetIconBox}>
+                      <Ionicons name="business" size={18} color={COLORS.primary} />
+                    </View>
+                    <Text style={styles.sheetItemName}>{s.name}</Text>
                   </View>
                   {form.societyName === s.name && <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />}
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity style={styles.closeCalendar} onPress={() => setShowSocietyModal(false)}>
-              <Text style={styles.closeCalendarText}>Close</Text>
+            <TouchableOpacity style={styles.sheetCloseBtn} onPress={() => { setShowSocietyModal(false); setSearch(''); }}>
+              <Text style={styles.sheetCloseText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -474,6 +547,18 @@ const styles = StyleSheet.create({
   // Society Modal Styles
   searchInput: { backgroundColor: '#F0F2F5', padding: 12, borderRadius: 10, marginTop: 15, fontSize: 14, color: COLORS.textPrimary },
   societyItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  societyItemName: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
-  societyItemCity: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
+  societyItemName: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary },
+  societyItemCity: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
+  // Bottom Sheet Premium Styles
+  sheetOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end', zIndex: 2000 },
+  sheetContent: { backgroundColor: COLORS.white, borderTopLeftRadius: 30, borderTopRightRadius: 30, height: '70%', paddingBottom: Platform.OS === 'ios' ? 40 : 20, ...SHADOW },
+  sheetHandle: { width: 40, height: 4, backgroundColor: '#E2E8F0', borderRadius: 2, alignSelf: 'center', marginTop: 12, marginBottom: 20 },
+  sheetTitle: { fontSize: 20, fontWeight: '900', color: COLORS.primary, textAlign: 'center', marginBottom: 20, paddingHorizontal: 20 },
+  sheetSearchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F1F5F9', borderRadius: 15, marginBottom: 15, height: 50 },
+  sheetSearchInput: { flex: 1, paddingHorizontal: 12, fontSize: 15, color: COLORS.textPrimary },
+  sheetItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+  sheetItemRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  sheetIconBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#EFF6FF', justifyContent: 'center', alignItems: 'center' },
+  sheetCloseBtn: { marginTop: 10, padding: 20, alignItems: 'center', borderTopWidth: 1, borderTopColor: '#F1F5F9' },
+  sheetCloseText: { color: COLORS.important, fontWeight: '800', fontSize: 16 },
 });
