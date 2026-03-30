@@ -1,12 +1,19 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from './_layout';
+import { useAuth } from '../context/AuthContext';
 import { COLORS, SHADOW } from '../constants/theme';
+import { contactSupport } from '../services/api';
+import Toast from 'react-native-toast-message';
+import { useState } from 'react';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
+
+  const [showSupport, setShowSupport] = useState(false);
+  const [supportMsg, setSupportMsg] = useState('');
+  const [sending, setSending] = useState(false);
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -114,6 +121,14 @@ export default function ProfileScreen() {
             <Text style={styles.directoryText}>{user?.role === 'admin' ? 'Gate Security Logs' : 'My Visitors'}</Text>
             <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} style={{ marginLeft: 'auto' }} />
           </TouchableOpacity>
+          <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 6 }} />
+          <TouchableOpacity style={styles.directoryBtn} onPress={() => setShowSupport(true)}>
+            <View style={styles.directoryIconWrap}>
+              <Ionicons name="help-buoy-outline" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.directoryText}>Contact Developer Support</Text>
+            <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} style={{ marginLeft: 'auto' }} />
+          </TouchableOpacity>
 
           {user?.role === 'resident' && (
             <>
@@ -174,6 +189,49 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Support Modal */}
+      {showSupport && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Contact Support</Text>
+            <Text style={styles.modalSub}>Describe your issue or feedback in detail. Our developers will review it.</Text>
+            <TextInput 
+              style={styles.modalInput}
+              placeholder="How can we help you?"
+              multiline
+              numberOfLines={4}
+              value={supportMsg}
+              onChangeText={setSupportMsg}
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.modalCancel} onPress={() => { setShowSupport(false); setSupportMsg(''); }}>
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.modalSend, sending && { opacity: 0.7 }]} 
+                onPress={async () => {
+                  if(!supportMsg.trim()) return Toast.show({ type: 'error', text1: 'Message cannot be empty' });
+                  setSending(true);
+                  try {
+                    await contactSupport(supportMsg);
+                    Toast.show({ type: 'success', text1: 'Support request sent!' });
+                    setShowSupport(false);
+                    setSupportMsg('');
+                  } catch {
+                    Toast.show({ type: 'error', text1: 'Failed to send request' });
+                  } finally {
+                    setSending(false);
+                  }
+                }}
+                disabled={sending}
+              >
+                <Text style={styles.modalSendText}>{sending ? 'Sending...' : 'Send Message'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -213,4 +271,15 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: COLORS.important, borderRadius: 14, paddingVertical: 14,
   },
   logoutText: { fontSize: 15, fontWeight: '700', color: COLORS.important },
+  // Modal Styles
+  modalOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20, zIndex: 1000 },
+  modalCard: { backgroundColor: COLORS.white, borderRadius: 24, padding: 25, ...SHADOW },
+  modalTitle: { fontSize: 20, fontWeight: '900', color: COLORS.textPrimary, marginBottom: 8 },
+  modalSub: { fontSize: 13, color: COLORS.textMuted, marginBottom: 20, lineHeight: 18 },
+  modalInput: { backgroundColor: '#F8F9FA', borderRadius: 12, padding: 15, fontSize: 15, color: COLORS.textPrimary, borderHorizontalWidth: 1, borderColor: '#E9ECEF', textAlignVertical: 'top', minHeight: 120, marginBottom: 20 },
+  modalActions: { flexDirection: 'row', gap: 12 },
+  modalCancel: { flex: 1, paddingVertical: 14, alignItems: 'center', borderRadius: 12, backgroundColor: '#F1F3F5' },
+  modalCancelText: { fontWeight: '700', color: COLORS.textSecondary },
+  modalSend: { flex: 2, paddingVertical: 14, alignItems: 'center', borderRadius: 12, backgroundColor: COLORS.primary },
+  modalSendText: { fontWeight: '700', color: COLORS.white },
 });

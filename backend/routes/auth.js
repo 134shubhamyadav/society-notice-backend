@@ -34,9 +34,14 @@ router.post('/register', async (req, res) => {
     if (await User.findOne({ email }))
       return res.status(400).json({ success: false, message: 'Email already registered' });
 
+    const isDev = role === 'developer';
+    const isAdmin = role === 'admin';
+    const isApproved = isAdmin || isDev; // Admins and Devs are auto-approved for now
+
     const user = await User.create({ 
       name, email, password, role: role || 'resident', societyName, flatNumber, 
-      securityKey: securityKey || '', gender, phone, personalEmail, dob 
+      securityKey: securityKey || '', gender, phone, personalEmail, dob,
+      isApproved: isApproved
     });
 
     res.status(201).json({
@@ -44,6 +49,7 @@ router.post('/register', async (req, res) => {
       data: {
         _id: user._id, name: user.name, email: user.email,
         role: user.role, societyName: user.societyName,
+        isApproved: user.isApproved,
         flatNumber: user.flatNumber, gender: user.gender,
         phone: user.phone, personalEmail: user.personalEmail,
         dob: user.dob, token: genToken(user._id)
@@ -69,6 +75,7 @@ router.post('/login', async (req, res) => {
       data: {
         _id: user._id, name: user.name, email: user.email,
         role: user.role, societyName: user.societyName,
+        isApproved: user.isApproved,
         flatNumber: user.flatNumber, gender: user.gender,
         phone: user.phone, personalEmail: user.personalEmail,
         dob: user.dob, token: genToken(user._id)
@@ -313,6 +320,60 @@ router.get('/users/:id', protect, adminOnly, async (req, res) => {
     if (user.societyName !== req.user.societyName)
       return res.status(403).json({ success: false, message: 'Not authorized for this society' });
     res.json({ success: true, data: user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+const Society = require('../models/Society');
+// GET ALL SOCIETIES (PUBLIC)
+router.get('/societies', async (req, res) => {
+  try {
+    const list = await Society.find().sort({ city: 1, name: 1 });
+    res.json({ success: true, data: list });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ADMIN: Get pending residents for their society
+router.get('/pending-residents', protect, adminOnly, async (req, res) => {
+  try {
+    const residents = await User.find({ 
+      societyName: req.user.societyName, 
+      role: 'resident', 
+      isApproved: false 
+    }).select('name email flatNumber phone');
+    res.json({ success: true, count: residents.length, data: residents });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ADMIN: Approve/Reject resident
+router.post('/approve-resident/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user || user.societyName !== req.user.societyName) {
+      return res.status(404).json({ success: false, message: 'Resident not found in your society' });
+    }
+    user.isApproved = true;
+    await user.save();
+    res.json({ success: true, message: 'Resident approved!' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.post('/reject-resident/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user || user.societyName !== req.user.societyName) {
+      return res.status(404).json({ success: false, message: 'Resident not found in your society' });
+    }
+    // Delete account if rejected as per user request
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Resident rejected and account deleted.' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

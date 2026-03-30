@@ -6,7 +6,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
-import { useAuth } from './_layout';
+import { useAuth } from '../context/AuthContext';
 import { requestProfileEdit } from '../services/api';
 import { COLORS, SHADOW } from '../constants/theme';
 

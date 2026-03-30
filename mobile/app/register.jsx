@@ -7,8 +7,8 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
-import { register as registerAPI } from '../services/api';
-import { useAuth } from './_layout';
+import { register as registerAPI, getSocieties } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { COLORS, SHADOW } from '../constants/theme';
 
 const ROLES = ['resident', 'admin'];
@@ -27,6 +27,20 @@ export default function RegisterScreen() {
   const [showAdminKey, setShowAdminKey] = useState(false);
   const [showSecurityKey, setShowSecurityKey] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [societies, setSocieties] = useState([]);
+  const [showSocietyModal, setShowSocietyModal] = useState(false);
+  const [search, setSearch] = useState('');
+
+  useState(() => {
+    fetchSocieties();
+  }, []);
+
+  const fetchSocieties = async () => {
+    try {
+      const res = await getSocieties();
+      setSocieties(res.data.data);
+    } catch {}
+  };
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
@@ -159,14 +173,15 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Society Name */}
-          <Text style={styles.label}>Society Name *</Text>
-          <View style={styles.inputWrap}>
+          {/* Society Name Selection */}
+          <Text style={styles.label}>Select Your Society *</Text>
+          <TouchableOpacity style={styles.inputWrap} onPress={() => setShowSocietyModal(true)}>
             <Ionicons name="business-outline" size={18} color={COLORS.textMuted} style={styles.inputIcon} />
-            <TextInput style={styles.input} placeholder="e.g. Sunrise Apartments"
-              placeholderTextColor={COLORS.textMuted}
-              value={form.societyName} onChangeText={v => set('societyName', v)} />
-          </View>
+            <Text style={[styles.input, !form.societyName && { color: COLORS.textMuted }]}>
+              {form.societyName || 'Select your society'}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={COLORS.textMuted} style={{ marginRight: 15 }} />
+          </TouchableOpacity>
 
           {/* Flat Number */}
           <Text style={styles.label}>Flat / House Number</Text>
@@ -261,6 +276,41 @@ export default function RegisterScreen() {
         </View>
       </ScrollView>
 
+      {/* Society Selection Modal */}
+      {showSocietyModal && (
+        <View style={styles.calendarModal}>
+          <View style={[styles.calendarCard, { maxHeight: '80%' }]}>
+            <Text style={styles.calendarMonth}>Select Society</Text>
+            <TextInput 
+              style={styles.searchInput}
+              placeholder="Search by name or city..." 
+              value={search}
+              onChangeText={setSearch}
+            />
+            <ScrollView style={{ marginTop: 10 }}>
+              {societies.filter(s => 
+                s.name.toLowerCase().includes(search.toLowerCase()) || 
+                s.city.toLowerCase().includes(search.toLowerCase())
+              ).map(s => (
+                <TouchableOpacity key={s._id} style={styles.societyItem} onPress={() => {
+                  set('societyName', s.name);
+                  setShowSocietyModal(false);
+                }}>
+                  <View>
+                    <Text style={styles.societyItemName}>{s.name}</Text>
+                    <Text style={styles.societyItemCity}>{s.city}</Text>
+                  </View>
+                  {form.societyName === s.name && <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity style={styles.closeCalendar} onPress={() => setShowSocietyModal(false)}>
+              <Text style={styles.closeCalendarText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       {/* Simple Calendar Modal for DOB */}
       {showCalendar && (
         <View style={styles.calendarModal}>
@@ -344,5 +394,10 @@ const styles = StyleSheet.create({
   dayText: { fontSize: 14, color: COLORS.textPrimary, fontWeight: '600' },
   dayTextSelected: { color: COLORS.white, fontWeight: '800' },
   closeCalendar: { marginTop: 20, padding: 12, alignItems: 'center', borderTopWidth: 1, borderTopColor: COLORS.border },
-  closeCalendarText: { color: COLORS.important, fontWeight: '700' }
+  closeCalendarText: { color: COLORS.important, fontWeight: '700' },
+  // Society Modal Styles
+  searchInput: { backgroundColor: '#F0F2F5', padding: 12, borderRadius: 10, marginTop: 15, fontSize: 14, color: COLORS.textPrimary },
+  societyItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  societyItemName: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
+  societyItemCity: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
 });

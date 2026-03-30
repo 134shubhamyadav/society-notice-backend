@@ -26,12 +26,14 @@ const noticeRoutes = require('./routes/notices');
 const helplineRoutes = require('./routes/helplines');
 const complaintRoutes = require('./routes/complaints');
 const visitorRoutes = require('./routes/visitors');
+const developerRoutes = require('./routes/developer');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/notices', noticeRoutes);
 app.use('/api/helplines', helplineRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/visitors', visitorRoutes);
+app.use('/api/developer', developerRoutes);
 
 // Health check
 app.get('/', (req, res) => {

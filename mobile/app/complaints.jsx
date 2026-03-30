@@ -4,7 +4,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { getComplaints, updateComplaint } from '../services/api';
-import { useAuth } from './_layout';
+import { useAuth } from '../context/AuthContext';
 import { COLORS, SHADOW } from '../constants/theme';
 
 export default function ComplaintsScreen() {

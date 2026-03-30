@@ -9,5 +9,6 @@
 //  export const BASE_URL = 'http://192.168.1.5:5000';
 // =====================================================
 
-export const BASE_URL = 'https://society-notice-backend.onrender.com';
+// export const BASE_URL = 'https://society-notice-backend.onrender.com';
+export const BASE_URL = 'http://192.168.0.105:5000';
 export const API_URL = `${BASE_URL}/api`;

@@ -11,7 +11,7 @@ import {
   likeNotice 
 } from '../services/api';
 import { translateNotice, LANGUAGES } from '../services/translate';
-import { useAuth } from './_layout';
+import { useAuth } from '../context/AuthContext';
 import { COLORS, SHADOW } from '../constants/theme';
 
 function formatDate(d) {

@@ -9,7 +9,7 @@ import Toast from 'react-native-toast-message';
 import NoticeCard from '../components/NoticeCard';
 import { getNotices, triggerSOS } from '../services/api';
 import { registerForPushNotifications } from '../services/notifications';
-import { useAuth } from './_layout';
+import { useAuth } from '../context/AuthContext';
 import { COLORS, SHADOW } from '../constants/theme';
 
 export default function HomeScreen() {
@@ -98,6 +98,9 @@ export default function HomeScreen() {
         <View style={styles.headerRight}>
           {user?.role === 'admin' && (
             <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity style={styles.postBtn} onPress={() => router.push('/admin/approve-residents')}>
+                <Ionicons name="people-circle-outline" size={20} color={COLORS.white} />
+              </TouchableOpacity>
               <TouchableOpacity style={styles.postBtn} onPress={() => router.push('/password-requests')}>
                 <Ionicons name="key-outline" size={20} color={COLORS.white} />
               </TouchableOpacity>

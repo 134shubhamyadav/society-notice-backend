@@ -1,13 +1,12 @@
-import { useEffect, createContext, useContext, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import * as Notifications from 'expo-notifications';
+import DevBanner from '../components/DevBanner';
 import { COLORS } from '../constants/theme';
-
-const AuthContext = createContext(null);
-export const useAuth = () => useContext(AuthContext);
+import AuthContext from '../context/AuthContext';
 
 export default function RootLayout() {
   const [user, setUser] = useState(null);
@@ -26,7 +25,8 @@ export default function RootLayout() {
     if (loading) return;
     const inAuthGroup = segments[0] === 'login' || segments[0] === 'register' || segments[0] === 'forgot-password';
     if (user && (segments[0] === 'index' || inAuthGroup || !segments[0])) {
-      router.replace('/home');
+      // Allow developer to stay on home if they are acting as something else
+      router.replace(user.role === 'developer' ? '/developer/dashboard' : '/home');
     } else if (!user && !inAuthGroup && segments[0] !== 'index' && segments[0]) {
       router.replace('/');
     }
@@ -35,7 +35,10 @@ export default function RootLayout() {
   const loadUser = async () => {
     try {
       const stored = await AsyncStorage.getItem('user');
-      if (stored) setUser(JSON.parse(stored));
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setUser(parsed);
+      }
     } catch {}
     setLoading(false);
   };
@@ -62,6 +65,7 @@ export default function RootLayout() {
   return (
     <AuthContext.Provider value={{ user, login, logout, updateUser }}>
       <StatusBar style="light" backgroundColor={COLORS.primary} />
+      <DevBanner />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
@@ -78,6 +82,9 @@ export default function RootLayout() {
         <Stack.Screen name="directory" />
         <Stack.Screen name="calendar" />
         <Stack.Screen name="visitors" />
+        <Stack.Screen name="pending-approval" />
+        <Stack.Screen name="admin/approve-residents" />
+        <Stack.Screen name="developer/dashboard" />
       </Stack>
       <Toast />
     </AuthContext.Provider>

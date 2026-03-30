@@ -5,8 +5,9 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true, minlength: 6 },
-  role: { type: String, enum: ['admin', 'resident'], default: 'resident' },
+  role: { type: String, enum: ['admin', 'resident', 'developer'], default: 'resident' },
   societyName: { type: String, required: true, trim: true },
+  isApproved: { type: Boolean, default: false }, // Residents start as unapproved
   flatNumber: { type: String, trim: true, default: '' },
   expoPushToken: { type: String, default: null },
   acknowledgedNotices: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Notice' }],

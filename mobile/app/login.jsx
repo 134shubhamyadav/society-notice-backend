@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import { login as loginAPI } from '../services/api';
-import { useAuth } from './_layout';
+import { useAuth } from '../context/AuthContext';
 import { COLORS } from '../constants/theme';
 
 export default function LoginScreen() {
@@ -18,6 +18,18 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [devMode, setDevMode] = useState(false);
+  const [pressCount, setPressCount] = useState(0);
+
+  const handleLogoPress = () => {
+    const newCount = pressCount + 1;
+    setPressCount(newCount);
+    if (newCount >= 5) {
+      setDevMode(!devMode);
+      setPressCount(0);
+      Toast.show({ type: 'info', text1: devMode ? 'Developer Mode OFF' : 'Developer Mode ON 🛠️' });
+    }
+  };
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -27,9 +39,20 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const res = await loginAPI({ email: email.trim().toLowerCase(), password });
-      await login(res.data.data);
-      Toast.show({ type: 'success', text1: `Welcome back, ${res.data.data.name}!` });
-      router.replace('/home');
+      const userData = res.data.data;
+      
+      await login(userData);
+
+      // REDIRECTION LOGIC
+      if (userData.role === 'developer') {
+        router.replace('/developer/dashboard');
+      } else if (userData.role === 'resident' && !userData.isApproved) {
+        router.replace('/pending-approval');
+      } else {
+        router.replace('/home');
+      }
+      
+      Toast.show({ type: 'success', text1: `Welcome, ${userData.name}!` });
     } catch (err) {
       Toast.show({ type: 'error', text1: err?.response?.data?.message || 'Login failed' });
     } finally {
@@ -42,8 +65,10 @@ export default function LoginScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* Header */}
         <View style={styles.header}>
-          <Image source={require('../assets/icon.png')} style={{width: 64, height: 64, borderRadius: 16, marginBottom: 4}} />
-          <Text style={styles.headerTitle}>SocietySphere</Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={handleLogoPress}>
+            <Image source={require('../assets/icon.png')} style={{width: 64, height: 64, borderRadius: 16, marginBottom: 4}} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>SocietySphere {devMode && <Text style={{fontSize: 12, color: COLORS.important}}>(DEV)</Text>}</Text>
           <Text style={styles.headerSub}>Login to your account</Text>
         </View>
 

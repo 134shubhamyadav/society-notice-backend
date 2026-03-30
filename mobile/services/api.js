@@ -19,7 +19,8 @@ api.interceptors.response.use(
     console.warn(`[API ERROR] ${status}: ${message}`);
     
     if (status === 401) {
-      console.error('Session expired or unauthorized. Please re-login.');
+      console.warn(`[AUTH ERROR] 401 Unauthorized on ${error.config?.url}. The session will NOT be cleared automatically.`);
+      // Removed automatic clearing as per user request to prevent "logout loops"
     }
     return Promise.reject(error);
   }
@@ -37,6 +38,12 @@ export const forgotPasswordResident = (data) => api.post('/auth/forgot-password-
 export const forgotPasswordAdmin = (data) => api.post('/auth/forgot-password-admin', data);
 export const getPasswordRequests = () => api.get('/auth/password-requests');
 export const approvePassword = (userId) => api.post(`/auth/approve-password/${userId}`);
+export const getSocieties = () => api.get('/auth/societies');
+
+// Admin Approval Features
+export const getPendingResidents = () => api.get('/auth/pending-residents');
+export const approveResident = (id) => api.post(`/auth/approve-resident/${id}`);
+export const rejectResident = (id) => api.post(`/auth/reject-resident/${id}`);
 
 // Profile Edit Requests
 export const requestProfileEdit = (data) => api.post('/auth/request-profile-edit', data);
@@ -73,5 +80,14 @@ export const postHelpline = (data) => api.post('/helplines', data);
 export const updateHelpline = (id, data) => api.put(`/helplines/${id}`, data);
 export const deleteHelpline = (id) => api.delete(`/helplines/${id}`);
 export const resetHelplines = () => api.post('/helplines/reset');
+
+// Support Ticket Features
+export const contactSupport = (message) => api.post('/developer/contact-support', { message });
+export const getDevSocieties = () => api.get('/developer/societies');
+export const addSociety = (data) => api.post('/developer/societies', data);
+export const deleteSociety = (id) => api.delete(`/developer/societies/${id}`);
+export const getSupportTickets = () => api.get('/developer/support-tickets');
+export const updateTicketStatus = (id, status) => api.put(`/developer/support-tickets/${id}`, { status });
+export const devSwitchContext = (role, societyName) => api.put('/developer/switch-context', { role, societyName });
 
 export default api;
