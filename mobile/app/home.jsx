@@ -84,7 +84,12 @@ export default function HomeScreen() {
 
   const importantCount = notices.filter(n => n.isImportant).length;
 
-
+  const isBirthday = () => {
+    if (!user?.dob) return false;
+    const today = new Date();
+    const dob = new Date(user.dob);
+    return today.getDate() === dob.getDate() && today.getMonth() === dob.getMonth();
+  };
 
   const ListHeader = () => (
     <View>
@@ -114,6 +119,20 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {isBirthday() && (
+        <View style={[styles.premiumBirthdayCard, { backgroundColor: '#FF6B6B' }]}>
+          <View style={styles.bdayGlass}>
+            <Text style={styles.bdayTitle}>Happy Birthday! 🎂</Text>
+            <Text style={styles.bdayMsg}>Wishing you a fantastic day filled with joy and celebration!</Text>
+            <View style={styles.balloonRow}>
+              <Text style={styles.bIcon}>🎈</Text>
+              <Text style={styles.bIcon}>🎉</Text>
+              <Text style={styles.bIcon}>🎊</Text>
+            </View>
+          </View>
+        </View>
+      )}
 
       <TouchableOpacity 
         style={[styles.statsBar, { backgroundColor: COLORS.important, marginTop: 16, marginBottom: 4, paddingVertical: 14, ...SHADOW }]} 
@@ -293,10 +312,10 @@ const styles = StyleSheet.create({
     width: 58, height: 58, justifyContent: 'center', alignItems: 'center',
     ...SHADOW, elevation: 8,
   },
-  premiumBirthdayCard: { marginHorizontal: 16, marginTop: 16, borderRadius: 20, overflow: 'hidden', ...SHADOW },
-  bdayGlass: { padding: 20, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)' },
-  bdayTitle: { fontSize: 22, fontWeight: '900', color: COLORS.white, marginBottom: 8 },
-  bdayMsg: { fontSize: 14, color: COLORS.white, textAlign: 'center', lineHeight: 20, opacity: 0.9 },
-  balloonRow: { flexDirection: 'row', gap: 15, marginTop: 15 },
-  bIcon: { fontSize: 20 },
+  premiumBirthdayCard: { marginHorizontal: 16, marginTop: 16, borderRadius: 24, overflow: 'hidden', ...SHADOW, elevation: 8 },
+  bdayGlass: { padding: 24, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)' },
+  bdayTitle: { fontSize: 24, fontWeight: '900', color: COLORS.white, marginBottom: 8, textAlign: 'center' },
+  bdayMsg: { fontSize: 14, color: COLORS.white, textAlign: 'center', lineHeight: 22, opacity: 0.95, fontWeight: '600' },
+  balloonRow: { flexDirection: 'row', gap: 20, marginTop: 20 },
+  bIcon: { fontSize: 24 },
 });
