@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 
 export default function DeveloperDashboard() {
   const router = useRouter();
-  const { updateUser } = useAuth();
+  const { updateUser, logout } = useAuth();
   const [tab, setTab] = useState('societies'); // 'societies', 'support', or 'testing'
   const [societies, setSocieties] = useState([]);
   const [tickets, setTickets] = useState([]);
@@ -39,6 +39,16 @@ export default function DeveloperDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = async () => {
+    Alert.alert('Logout', 'Are you sure you want to log out of the Developer Portal?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: async () => {
+        await logout();
+        router.replace('/login');
+      }}
+    ]);
   };
 
   const handleSwitchContext = async (role, societyName) => {
@@ -92,7 +102,7 @@ export default function DeveloperDashboard() {
       <View style={styles.header}>
         <View style={styles.topRow}>
           <Text style={styles.headerTitle}>Developer Portal</Text>
-          <TouchableOpacity onPress={() => router.replace('/login')}>
+          <TouchableOpacity onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={24} color={COLORS.white} />
           </TouchableOpacity>
         </View>
@@ -171,8 +181,9 @@ export default function DeveloperDashboard() {
       {loading ? (
         <ActivityIndicator style={{ marginTop: 50 }} color={COLORS.primary} size="large" />
       ) : (
-        <FlatList
-          data={tab === 'societies' ? societies : tickets}
+        tab !== 'testing' && (
+          <FlatList
+            data={tab === 'societies' ? societies : tickets}
           keyExtractor={item => item._id}
           contentContainerStyle={{ padding: 20 }}
           renderItem={({ item }) => (
@@ -208,7 +219,8 @@ export default function DeveloperDashboard() {
             )
           )}
         />
-      )}
+      )
+    )}
     </View>
   );
 }
