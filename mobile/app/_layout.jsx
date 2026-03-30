@@ -4,7 +4,6 @@ import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import * as Notifications from 'expo-notifications';
-import DevBanner from '../components/DevBanner';
 import { COLORS } from '../constants/theme';
 import AuthContext from '../context/AuthContext';
 
@@ -65,7 +64,6 @@ export default function RootLayout() {
   return (
     <AuthContext.Provider value={{ user, login, logout, updateUser }}>
       <StatusBar style="light" backgroundColor={COLORS.primary} />
-      <DevBanner />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
