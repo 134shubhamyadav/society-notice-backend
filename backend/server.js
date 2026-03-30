@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const User = require('./models/User');
+const Society = require('./models/Society');
 
 // Safety check for critical environment variables
 if (!process.env.JWT_SECRET) {
