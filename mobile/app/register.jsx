@@ -17,7 +17,7 @@ export default function RegisterScreen() {
   const router = useRouter();
   const { login } = useAuth();
   const [form, setForm] = useState({
-    name: '', email: '', password: '', role: 'resident',
+    name: '', email: '', password: '', role: 'resident', position: 'Society Admin',
     societyName: '', flatNumber: '', adminKey: '', securityKey: '', gender: 'Male', phone: '', personalEmail: '', dob: ''
   });
   const [showCalendar, setShowCalendar] = useState(false);
@@ -257,6 +257,20 @@ export default function RegisterScreen() {
               <Text style={styles.adminNote}>
                 ⚠️ Admin accounts require a secret key. Contact your society manager for the key.
               </Text>
+
+              {/* Admin Position Field */}
+              <Text style={styles.label}>Admin Position / Title *</Text>
+              <View style={styles.inputWrap}>
+                <Ionicons name="briefcase-outline" size={18} color={COLORS.primary} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. Secretary, Accountant, Chairman"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={form.position}
+                  onChangeText={v => set('position', v)}
+                />
+              </View>
+
               <Text style={styles.label}>Admin Secret Key *</Text>
               <View style={styles.inputWrap}>
                 <Ionicons name="key-outline" size={18} color={COLORS.important} style={styles.inputIcon} />

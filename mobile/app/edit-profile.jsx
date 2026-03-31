@@ -13,10 +13,9 @@ import { COLORS, SHADOW } from '../constants/theme';
 export default function EditProfileScreen() {
   const router = useRouter();
   const { user, updateUser } = useAuth();
-
   const [form, setForm] = useState({
     name: '', flatNumber: '', gender: 'Male', 
-    phone: '', personalEmail: '', dob: '', showBirthdayUI: false 
+    phone: '', personalEmail: '', dob: '', showBirthdayUI: false, position: '' 
   });
   const [loading, setLoading] = useState(false);
   const [selectedField, setSelectedField] = useState(null);
@@ -32,7 +31,8 @@ export default function EditProfileScreen() {
         phone: user.phone || '',
         personalEmail: user.personalEmail || '',
         dob: user.dob ? new Date(user.dob).toISOString().split('T')[0] : '',
-        showBirthdayUI: user.showBirthdayUI || false
+        showBirthdayUI: user.showBirthdayUI || false,
+        position: user.position || 'Society Admin'
       });
     }
   }, [user]);
@@ -69,6 +69,7 @@ export default function EditProfileScreen() {
     { id: 'personalEmail', label: 'Email Address', icon: 'mail', val: form.personalEmail || 'Enter email' },
     { id: 'dob', label: 'Birthday', icon: 'gift', val: form.dob || 'Select date' },
     { id: 'gender', label: 'Gender', icon: 'transgender', val: form.gender },
+    ...(user?.role === 'admin' ? [{ id: 'position', label: 'Position / Title', icon: 'briefcase', val: form.position }] : []),
   ];
 
   const [showYearList, setShowYearList] = useState(false);

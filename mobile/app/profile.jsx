@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
@@ -84,9 +84,9 @@ export default function ProfileScreen() {
               name={user?.role === 'admin' ? 'shield-checkmark' : 'people'}
               size={13} color={user?.role === 'admin' ? COLORS.accent : COLORS.primary}
             />
-            <Text style={[styles.roleText, user?.role === 'admin' && { color: COLORS.accent }]}>
-              {user?.role === 'admin' ? 'Society Admin' : 'Resident'}
-            </Text>
+              <Text style={[styles.roleText, user?.role === 'admin' && { color: COLORS.accent }]}>
+                {user?.role === 'admin' ? (user?.position || 'Society Admin') : 'Resident'}
+              </Text>
           </View>
         </View>
 

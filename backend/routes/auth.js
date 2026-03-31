@@ -10,7 +10,7 @@ const genToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '
 
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role, societyName, flatNumber, adminKey, securityKey, gender, phone, personalEmail, dob } = req.body;
+    const { name, email, password, role, societyName, flatNumber, adminKey, securityKey, gender, phone, personalEmail, dob, position } = req.body;
     if (!name || !email || !password || !societyName || !gender || !phone || !personalEmail || !dob)
       return res.status(400).json({ success: false, message: 'All fields including DOB are required' });
 
@@ -42,7 +42,8 @@ router.post('/register', async (req, res) => {
       name, email, password, role: role || 'resident', societyName, flatNumber, 
       securityKey: securityKey || '', gender, phone, personalEmail, dob,
       isApproved: isApproved,
-      isDeveloper: isDev // Set permanent flag
+      isDeveloper: isDev, // Set permanent flag
+      position: position || (role === 'admin' ? 'Society Admin' : '')
     });
 
     res.status(201).json({
@@ -53,7 +54,8 @@ router.post('/register', async (req, res) => {
         isApproved: user.isApproved,
         flatNumber: user.flatNumber, gender: user.gender,
         phone: user.phone, personalEmail: user.personalEmail,
-        dob: user.dob, token: genToken(user._id)
+        dob: user.dob, token: genToken(user._id),
+        position: user.position
       }
     });
   } catch (err) {
@@ -79,7 +81,8 @@ router.post('/login', async (req, res) => {
         isApproved: user.isApproved,
         flatNumber: user.flatNumber, gender: user.gender,
         phone: user.phone, personalEmail: user.personalEmail,
-        dob: user.dob, token: genToken(user._id)
+        dob: user.dob, token: genToken(user._id),
+        position: user.position
       }
     });
   } catch (err) {
@@ -185,7 +188,7 @@ router.post('/forgot-password-admin', async (req, res) => {
 router.post('/request-profile-edit', protect, async (req, res) => {
   console.log('[PROFILE] Update request received:', req.body);
   try {
-    const { name, flatNumber, gender, phone, personalEmail, dob, showBirthdayUI } = req.body;
+    const { name, flatNumber, gender, phone, personalEmail, dob, showBirthdayUI, position } = req.body;
     
     // 1. Fetch current user
     const user = await User.findById(req.user._id);
@@ -203,6 +206,8 @@ router.post('/request-profile-edit', protect, async (req, res) => {
     if (phone !== undefined) user.phone = String(phone);
     if (personalEmail !== undefined) user.personalEmail = String(personalEmail);
     if (showBirthdayUI !== undefined) user.showBirthdayUI = Boolean(showBirthdayUI);
+    
+    if (position) user.position = position;
     
     // Handle DOB carefully
     if (dob) {
