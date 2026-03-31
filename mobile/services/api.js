@@ -82,6 +82,7 @@ export const deleteHelpline = (id) => api.delete(`/helplines/${id}`);
 export const resetHelplines = () => api.post('/helplines/reset');
 
 // Support Ticket Features
+export const getMySupportTickets = () => api.get('/developer/my-tickets');
 export const contactSupport = (message) => api.post('/developer/contact-support', { message });
 export const getDevSocieties = () => api.get('/developer/societies');
 export const addSociety = (data) => api.post('/developer/societies', data);

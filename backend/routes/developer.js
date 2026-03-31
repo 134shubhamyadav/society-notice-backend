@@ -63,6 +63,15 @@ router.put('/support-tickets/:id', protect, devOnly, async (req, res) => {
 });
 
 // --- User Interaction ---
+router.get('/my-tickets', protect, async (req, res) => {
+  try {
+    const tickets = await Support.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    res.json({ success: true, data: tickets });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 router.post('/contact-support', protect, async (req, res) => {
   try {
     const { message } = req.body;

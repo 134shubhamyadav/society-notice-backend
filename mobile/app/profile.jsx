@@ -14,6 +14,21 @@ export default function ProfileScreen() {
   const [showSupport, setShowSupport] = useState(false);
   const [supportMsg, setSupportMsg] = useState('');
   const [sending, setSending] = useState(false);
+  const [myTickets, setMyTickets] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+
+  const fetchMyTickets = async () => {
+    setLoadingTickets(true);
+    try {
+      const { getMySupportTickets } = require('../services/api');
+      const res = await getMySupportTickets();
+      setMyTickets(res.data.data);
+    } catch {
+      console.warn('Failed to load support history');
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -122,7 +137,7 @@ export default function ProfileScreen() {
             <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} style={{ marginLeft: 'auto' }} />
           </TouchableOpacity>
           <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 6 }} />
-          <TouchableOpacity style={styles.directoryBtn} onPress={() => setShowSupport(true)}>
+          <TouchableOpacity style={styles.directoryBtn} onPress={() => { setShowSupport(true); fetchMyTickets(); }}>
             <View style={styles.directoryIconWrap}>
               <Ionicons name="help-buoy-outline" size={18} color={COLORS.primary} />
             </View>
@@ -230,8 +245,8 @@ export default function ProfileScreen() {
                   try {
                     await contactSupport(supportMsg);
                     Toast.show({ type: 'success', text1: 'Support request sent!' });
-                    setShowSupport(false);
                     setSupportMsg('');
+                    fetchMyTickets(); // Refresh list
                   } catch {
                     Toast.show({ type: 'error', text1: 'Failed to send request' });
                   } finally {
@@ -242,6 +257,40 @@ export default function ProfileScreen() {
               >
                 <Text style={styles.modalSendText}>{sending ? 'Sending...' : 'Send Message'}</Text>
               </TouchableOpacity>
+            </View>
+
+            {/* Support History Subsection */}
+            <View style={{ marginTop: 24 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <Text style={styles.historyTitle}>Your Support History</Text>
+                {loadingTickets && <ActivityIndicator size="small" color={COLORS.primary} />}
+              </View>
+              
+              <View style={{ maxHeight: 200 }}>
+                {myTickets.length === 0 ? (
+                  <Text style={styles.emptyHistory}>No previous records found.</Text>
+                ) : (
+                  <ScrollView nestedScrollEnabled showsVerticalScrollIndicator={false}>
+                    {myTickets.map((ticket) => (
+                      <View key={ticket._id} style={styles.historyItem}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.historyMsg} numberOfLines={1}>{ticket.message}</Text>
+                          <Text style={styles.historyDate}>{new Date(ticket.createdAt).toLocaleDateString()}</Text>
+                        </View>
+                        <View style={[
+                          styles.statusBadge,
+                          { backgroundColor: ticket.status === 'Resolved' ? '#DEF7EC' : ticket.status === 'In Progress' ? '#FEF3C7' : '#F1F5F9' }
+                        ]}>
+                          <Text style={[
+                            styles.statusText,
+                            { color: ticket.status === 'Resolved' ? '#03543F' : ticket.status === 'In Progress' ? '#92400E' : COLORS.textSecondary }
+                          ]}>{ticket.status}</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </ScrollView>
+                )}
+              </View>
             </View>
           </View>
         </View>
@@ -296,4 +345,11 @@ const styles = StyleSheet.create({
   modalCancelText: { fontWeight: '700', color: COLORS.textSecondary },
   modalSend: { flex: 2, paddingVertical: 14, alignItems: 'center', borderRadius: 12, backgroundColor: COLORS.primary },
   modalSendText: { fontWeight: '700', color: COLORS.white },
+  historyTitle: { fontSize: 13, fontWeight: '800', color: COLORS.textMuted, textTransform: 'uppercase' },
+  historyItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#F1F5F9' },
+  historyMsg: { fontSize: 14, color: COLORS.textPrimary, fontWeight: '600' },
+  historyDate: { fontSize: 11, color: COLORS.textMuted, marginTop: 2 },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  statusText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
+  emptyHistory: { fontSize: 13, color: COLORS.textMuted, textAlign: 'center', marginTop: 10 },
 });
