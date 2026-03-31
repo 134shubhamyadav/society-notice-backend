@@ -176,7 +176,7 @@ export default function ProfileScreen() {
         {/* App info card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>About App</Text>
-          <InfoRow icon="information-circle-outline" label="App Name" value="SocietyNotice" />
+          <InfoRow icon="information-circle-outline" label="App Name" value="SocietySphere" />
           <InfoRow icon="code-slash-outline" label="Version" value="1.0.0" />
           <InfoRow icon="school-outline" label="College" value="SMT. Indira Gandhi College of Engineering" />
           <InfoRow icon="people-outline" label="Project Team" value="SocietySphere Development Team" />

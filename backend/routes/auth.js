@@ -103,7 +103,10 @@ router.get('/me', protect, async (req, res) => {
 // GET SOCIETY DIRECTORY
 router.get('/directory', protect, async (req, res) => {
   try {
-    const users = await User.find({ societyName: req.user.societyName })
+    const users = await User.find({ 
+      societyName: req.user.societyName,
+      role: { $ne: 'developer' } 
+    })
       .select('name email role flatNumber gender')
       .sort({ flatNumber: 1 });
     res.json({ success: true, count: users.length, data: users });
