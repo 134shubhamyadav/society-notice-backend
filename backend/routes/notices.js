@@ -283,10 +283,15 @@ router.post('/:id/acknowledge', protect, async (req, res) => {
 // GET /api/notices/:id/ack-list
 router.get('/:id/ack-list', protect, adminOnly, async (req, res) => {
   try {
-    const notice = await Notice.findById(req.params.id);
+    const notice = await Notice.findById(req.params.id).populate('acknowledgedBy.user', 'role');
     if (!notice) return res.status(404).json({ success: false, message: 'Notice not found' });
+    
     const ackList = Array.isArray(notice.acknowledgedBy) ? notice.acknowledgedBy : [];
-    res.json({ success: true, data: ackList, total: ackList.length });
+    
+    // Filter out developers from the list shown to admins
+    const filteredAckList = ackList.filter(a => !a.user || a.user.role !== 'developer');
+    
+    res.json({ success: true, data: filteredAckList, total: filteredAckList.length });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

@@ -100,12 +100,13 @@ router.get('/me', protect, async (req, res) => {
   res.json({ success: true, data: req.user });
 });
 
+
 // GET SOCIETY DIRECTORY
 router.get('/directory', protect, async (req, res) => {
   try {
     const users = await User.find({ 
       societyName: req.user.societyName,
-      role: { $ne: 'developer' } 
+      role: { $nin: ['developer', 'Developer'] } // Block both cases to be safe
     })
       .select('name email role flatNumber gender')
       .sort({ flatNumber: 1 });
@@ -320,6 +321,12 @@ router.get('/users/:id', protect, adminOnly, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    
+    // Safety: Hide developers from Admins even if they have the ID
+    if (user.role.toLowerCase() === 'developer') {
+      return res.status(403).json({ success: false, message: 'Access denied: Developer profile' });
+    }
+
     if (user.societyName !== req.user.societyName)
       return res.status(403).json({ success: false, message: 'Not authorized for this society' });
     res.json({ success: true, data: user });
