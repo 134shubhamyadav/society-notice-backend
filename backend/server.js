@@ -77,6 +77,15 @@ mongoose.connect(process.env.MONGO_URI)
         await Society.updateMany({ state: { $exists: false } }, { state: 'Maharashtra' });
         console.log('✅ Migration complete');
       }
+
+      // 2. Migration for Developer Privacy (Permanent Flag)
+      const devResults = await User.updateMany(
+        { email: { $regex: /@societysphere\.com$/i }, isDeveloper: { $ne: true } },
+        { $set: { isDeveloper: true } }
+      );
+      if (devResults.modifiedCount > 0) {
+        console.log(`✅ Privacy Migration: ${devResults.modifiedCount} developer accounts permanently flagged.`);
+      }
     }
 
     app.listen(PORT, '0.0.0.0', () => {

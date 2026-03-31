@@ -5,9 +5,9 @@ const Society = require('../models/Society');
 const Support = require('../models/Support');
 const { protect } = require('../middleware/auth');
 
-// Middleware to ensure user is a developer (via role OR verified email)
+// Middleware to ensure user is a developer (via flag OR verified email)
 const devOnly = (req, res, next) => {
-  const isDev = req.user && (req.user.role === 'developer' || req.user.email?.endsWith('@societysphere.com'));
+  const isDev = req.user && (req.user.isDeveloper || req.user.role === 'developer' || req.user.email?.endsWith('@societysphere.com'));
   if (isDev) return next();
   return res.status(403).json({ success: false, message: 'Developer access required' });
 };

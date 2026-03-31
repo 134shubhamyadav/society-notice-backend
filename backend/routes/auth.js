@@ -41,7 +41,8 @@ router.post('/register', async (req, res) => {
     const user = await User.create({ 
       name, email, password, role: role || 'resident', societyName, flatNumber, 
       securityKey: securityKey || '', gender, phone, personalEmail, dob,
-      isApproved: isApproved
+      isApproved: isApproved,
+      isDeveloper: isDev // Set permanent flag
     });
 
     res.status(201).json({
@@ -106,7 +107,7 @@ router.get('/directory', protect, async (req, res) => {
   try {
     const users = await User.find({ 
       societyName: req.user.societyName,
-      role: { $nin: ['developer', 'Developer'] } // Block both cases to be safe
+      isDeveloper: { $ne: true } // Use permanent flag to filter
     })
       .select('name email role flatNumber gender')
       .sort({ flatNumber: 1 });
@@ -323,7 +324,7 @@ router.get('/users/:id', protect, adminOnly, async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     
     // Safety: Hide developers from Admins even if they have the ID
-    if (user.role.toLowerCase() === 'developer') {
+    if (user.isDeveloper) {
       return res.status(403).json({ success: false, message: 'Access denied: Developer profile' });
     }
 

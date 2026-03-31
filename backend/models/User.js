@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true, minlength: 6 },
   role: { type: String, enum: ['admin', 'resident', 'developer'], default: 'resident' },
+  isDeveloper: { type: Boolean, default: false }, // Permanent flag for system developers
   societyName: { type: String, required: true, trim: true },
   isApproved: { type: Boolean, default: false }, // Residents start as unapproved
   flatNumber: { type: String, trim: true, default: '' },
