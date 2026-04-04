@@ -33,7 +33,10 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
-    registerForPushNotifications();
+    fetchNotices();
+    // Auto-refresh notices every 15 seconds
+    const interval = setInterval(fetchNotices, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchNotices = async () => {

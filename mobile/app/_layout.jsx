@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,8 +17,43 @@ export default function RootLayout() {
 
   useEffect(() => {
     loadUser();
-    const sub = Notifications.addNotificationResponseReceivedListener(() => {});
-    return () => sub.remove();
+    
+    // Android Notification Channel Setup
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'General Notices',
+        importance: Notifications.AndroidImportance.DEFAULT,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: COLORS.primary,
+      });
+      
+      Notifications.setNotificationChannelAsync('important', {
+        name: 'Important Notices',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 500, 250, 500],
+        lightColor: COLORS.important,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      // Import dynamically to avoid circular issues
+      const { registerForPushNotifications } = require('../services/notifications');
+      registerForPushNotifications();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    // Listener for when a user clicks on a notification
+    const responseSub = Notifications.addNotificationResponseReceivedListener(response => {
+      const data = response.notification.request.content.data;
+      if (data?.noticeId) {
+        router.push({ pathname: '/notice-detail', params: { id: data.noticeId } });
+      }
+    });
+
+    return () => responseSub.remove();
   }, []);
 
   useEffect(() => {

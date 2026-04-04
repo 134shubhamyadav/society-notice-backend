@@ -30,11 +30,13 @@ async function sendPushToSociety(societyName, headline, isImportant, excludeUser
     }
 
     const chunks = expo.chunkPushNotifications(messages);
+    console.log(`[PUSH] Sending ${messages.length} notifications in ${chunks.length} chunks to society: ${societyName}`);
     for (const chunk of chunks) {
       await expo.sendPushNotificationsAsync(chunk);
     }
+    console.log(`[PUSH] Batch sent successfully.`);
   } catch (err) {
-    console.error('Push notification error:', err.message);
+    console.error('[PUSH ERROR]:', err.message);
   }
 }
 
@@ -195,10 +197,14 @@ router.post('/sos', protect, async (req, res) => {
       expiryDate: new Date(Date.now() + 24 * 60 * 60 * 1000)
     });
 
-    // Trigger push notifications in background
-    sendPushToSociety(req.user.societyName, headline, true, null).catch(err => {
-        console.error('[SOS] Push failed:', err.message);
-    });
+    // Trigger push notifications in background 3 times
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        sendPushToSociety(req.user.societyName, `(${i + 1}/3) ${headline}`, true, null).catch(err => {
+            console.error(`[SOS] Push failed on attempt ${i + 1}:`, err.message);
+        });
+      }, i * 3000); // 3 seconds apart
+    }
 
     console.log(`[SOS] SUCCESS: Panic Alert created for society: ${req.user.societyName}`);
     res.status(201).json({ success: true, message: 'SOS Panic Alerts triggered globally!', data: notice });

@@ -246,7 +246,8 @@ export default function ProfileScreen() {
                     await contactSupport(supportMsg);
                     Toast.show({ type: 'success', text1: 'Support request sent!' });
                     setSupportMsg('');
-                    fetchMyTickets(); // Refresh list
+                    setShowSupport(false); // Auto-close on success
+                    fetchMyTickets(); // Refresh history
                   } catch {
                     Toast.show({ type: 'error', text1: 'Failed to send request' });
                   } finally {
